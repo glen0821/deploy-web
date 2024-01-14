@@ -99,7 +99,7 @@
           <span>
             <i class="fi fi-rr-vote-yea"></i>
           </span>
-         <span>Regitered voters</span> 
+         <span>Registered users</span> 
         </p>
       </div>
     </div>
@@ -119,7 +119,7 @@
               <i class="fi fi-rr-id-badge"></i>
             </span>
             <span>
-              Total id request
+              Total I.D request
             </span>
             
           </p>

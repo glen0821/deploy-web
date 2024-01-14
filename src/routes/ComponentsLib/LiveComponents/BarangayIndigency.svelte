@@ -4,18 +4,19 @@
     import { fly } from "svelte/transition";
   
     import {
-      onSnapsClearance,
-      showClearanceAddModal,
-      compareClearanceValue,
+      onSnapsIndigency,
+      showIndigencyAddModal,
+      compareIndigencyValue,
       printing,
     } from "../BoundComponents/clickOutside";
     import { showPrintModel, formattedDate } from "./stateStore";
-  
+
     import bgyClearance from "../Images/bgyClearance.jpg";
     import PrintContent from "./PrintContent.svelte";
   
     //database calls and hooks
     import { auth, db } from "../../db/firebase";
+    +
     import {
       onSnapshot,
       addDoc,
@@ -32,7 +33,7 @@
   
     //handler to show add modal
     const toShowAddModal = () => {
-      showClearanceAddModal.set(true);
+      showIndigencyAddModal.set(true);
     };
   
     //barangayID varStore
@@ -54,10 +55,10 @@
   
     //submit data to database
     const submitData = async () => {
-      const colRef = collection(db, "barangayClearance");
+      const colRef = collection(db, "barangayIndigency");
       addDoc(colRef, {
         createdAt: serverTimestamp(),
-        bgyClearanceCounter: increment(1),
+        bgyIndigencyCounter: increment(1),
         firstName: bgyVarStore.firstName.BINDTHIS,
         lastName: bgyVarStore.lastName.BINDTHIS,
         middleInitial: bgyVarStore.middleInitial.BINDTHIS,
@@ -68,12 +69,12 @@
         purpose: bgyVarStore.purpose.BINDTHIS,
         dateOfAppointment: bgyVarStore.dateOfAppointment.BINDTHIS,
       }).then(() => {
-        showClearanceAddModal.set(false);
+        showIndigencyAddModal.set(false);
       });
     };
   
     //fetch data from database
-    const colRef = collection(db, "barangayClearance");
+    const colRef = collection(db, "barangayIndigency");
     const q = query(colRef, orderBy("createdAt", "desc"));
     onSnapshot(q, (snapshots) => {
       let fbData = [];
@@ -121,7 +122,7 @@
   
     //showModalComparison
     const editValueHandler = (data) => {
-      compareClearanceValue.set(data);
+      compareIndigencyValue.set(data);
     };
   
     const handlerSearch = () => {
@@ -137,7 +138,7 @@
             let data = { ...doc.data(), id: doc.id };
             fbData = [data, ...fbData];
           });
-          onSnapsClearance.set(fbData);
+          onSnapsIndigency.set(fbData);
         });
   
         bgyVarStore.trigger = false;
@@ -153,7 +154,7 @@
             let data = { ...doc.data(), id: doc.id };
             fbData = [data, ...fbData];
           });
-          onSnapsClearance.set(fbData);
+          onSnapsIndigency.set(fbData);
         });
         bgyVarStore.trigger = false;
       } else {
@@ -219,12 +220,12 @@
       <div class="flex gap-2 items-center mb-2">
         <div class="w-full flex gap-2">
           <div class="">
-            <Button TITLE="Add Barangay Clearance" on:click={toShowAddModal} />
+            <Button TITLE="Add Barangay Indigency" on:click={toShowAddModal} />
           </div>
   
           <div class="">
             <Button
-              TITLE="Generate Barangay Clearance"
+              TITLE="Generate Barangay Indigency"
               on:click={() => showPrintModel.set(true)}
             />
           </div>
@@ -279,7 +280,7 @@
         {/if}
       </div>
   
-      {#if $showClearanceAddModal}
+      {#if $showIndigencyAddModal}
         <div
           class="flex flex-col gap-2 bg-white p-4 max-w-fit mx-auto rounded-lg mt-2 absolute left-0 right-0 border-2 border-guiColor z-10"
         >
@@ -369,7 +370,7 @@
             <Button
               TITLE="Cancel"
               on:click={() => {
-                showClearanceAddModal.set(false);
+                showIndigencyAddModal.set(false);
               }}
             />
           </div>
@@ -399,54 +400,54 @@
               </tr>
             </thead>
             <tbody>
-              {#each $onSnapsClearance as barangayClearance, i}
-                <!-- {console.log(barangayClearance)} -->
+              {#each $onSnapsIndigency as barangayIndigency, i}
+                <!-- {console.log(barangayIndigency)} -->
                 <tr class="bg-white border-b">
                   <th
                     scope="row"
                     class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
                   >
-                    {barangayClearance.firstName}
+                    {barangayIndigency.firstName}
                   </th>
                   <td class="px-6 py-4">
-                    {barangayClearance.middleInitial}
+                    {barangayIndigency.middleInitial}
                   </td>
                   <td class="px-6 py-4">
-                    {barangayClearance.lastName}
+                    {barangayIndigency.lastName}
                   </td>
                   <td class="px-6 py-4">
-                    {barangayClearance.suffixName}
+                    {barangayIndigency.suffixName}
                   </td>
                   <td class="px-6 py-4">
-                    {barangayClearance.address}
+                    {barangayIndigency.address}
                   </td>
                   <td class="px-6 py-4">
-                    {barangayClearance.age}
+                    {barangayIndigency.age}
                   </td>
                   <td class="px-6 py-4">
-                    {barangayClearance.lengthOfStay}
+                    {barangayIndigency.lengthOfStay}
                   </td>
                   <td class="px-6 py-4">
-                    {barangayClearance.purpose}
+                    {barangayIndigency.purpose}
                   </td>
                   <td class="px-6 py-4">
-                    {barangayClearance.dateOfAppointment}
+                    {barangayIndigency.dateOfAppointment}
                   </td>
                   {#if $showPrintModel}
   
                   <td class="px-6 py-4">
-                    {barangayClearance.status}
+                    {barangayIndigency.status}
                   </td>
                   {/if}
                   {#if !$showPrintModel}
                   <td class="px-6 py-4">
                     <select
                       class="bg-white"
-                      bind:value={barangayClearance.status}
+                      bind:value={barangayIndigency.status}
                       on:change={() =>
                         updateStatus(
-                          barangayClearance.id,
-                          barangayClearance.status
+                          barangayIndigency.id,
+                          barangayIndigency.status
                         )}
                     >
                       <option value="Processing">On Process</option>
@@ -465,20 +466,20 @@
   
                       <button
                         class="hover:bg-red-500 rounded-full px-4 py-2 hover:scale-105 duration-700 text-red-900 hover:text-white"
-                        on:click={removeData(barangayClearance.id)}
+                        on:click={removeData(barangayIndigency.id)}
                         ><i class="ri-delete-bin-line"></i></button
                       >
   
                       <button
                         class="hover:bg-blue-500 rounded-full px-4 py-2 hover:scale-105 duration-700 text-blue-900 hover:text-white"
-                        on:click={() => printPdf(barangayClearance)}
+                        on:click={() => printPdf(barangayIndigency)}
                         ><i class="ri-printer-line"></i></button
                       >
                     </div>
                   </td>
                   {/if}
                 </tr>
-                {#if $compareClearanceValue === i}
+                {#if $compareIndigencyValue === i}
                   <div class="">
                     <div
                       class="flex flex-col gap-2 p-4 max-w-fit mx-auto rounded-lg mt-2 absolute left-0 right-0 border-2 border-slate-200 z-10"
@@ -541,14 +542,14 @@
                       <div class="flex gap-2">
                         <button
                           class="bg-orange-300 px-4 py-2 rounded-lg w-1/2"
-                          on:click={updateData(barangayClearance.id)}
+                          on:click={updateData(barangayIndigency.id)}
                         >
                           Update
                         </button>
                         <button
                           class="bg-red-300 px-4 py-2 rounded-lg w-1/2"
                           on:click={() => {
-                            compareClearanceValue.set("");
+                            compareIndigencyValue.set("");
                           }}
                         >
                           Cancel
@@ -562,7 +563,7 @@
           </table>
         </div>
   
-        <!-- {#each $onSnapsClearance as value, i}
+        <!-- {#each $onSnapsIndigency as value, i}
               <div class="flex justify-center items-center " in:fly={{x:-400, duration:1000}}>
                   <p class="w-[25%] font-bold border-b-2 border-white bg-slate-300 p-2 ">Complete Name</p>
                   <p class="w-full border-b-2 border-white bg-slate-100 p-2 ">{value.completeName}</p>
@@ -596,7 +597,7 @@
                       >Print</button>
                       
                   </div>
-                  {#if $compareClearanceValue === i}
+                  {#if $compareIndigencyValue === i}
                       <div class="">
                           <div class="flex flex-col gap-2 bg-guiColor p-4 max-w-fit mx-auto rounded-lg mt-2 absolute left-0 right-0 border-2 border-slate-200 z-10">
                               <p class="text-xl text-center font-bold p-2 text-slate-500">Modify Values</p>
@@ -630,7 +631,7 @@
   
                               <div class="flex gap-2">
                                   <Button TITLE="Confirm Edit" on:click={updateData(value.id)}/>
-                                  <Button TITLE="Cancel" on:click={() => {compareClearanceValue.set("")}}/>
+                                  <Button TITLE="Cancel" on:click={() => {compareIndigencyValue.set("")}}/>
                               </div>
                           </div>
                       </div>

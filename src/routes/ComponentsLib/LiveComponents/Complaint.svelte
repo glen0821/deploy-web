@@ -156,7 +156,7 @@
     <div class="flex gap-2 items-center mb-2">
       <div class="w-full flex gap-2">
         <div class="">
-          <Button TITLE="New Blotter" on:click={toShowAddModal} />
+          <Button TITLE="Add complaint" on:click={toShowAddModal} />
         </div>
 
         <div class="">
@@ -219,7 +219,7 @@
         class="flex flex-col gap-2 bg-white p-4 max-w-fit mx-auto rounded-lg mt-2 absolute left-0 right-0 border-2 border-guiColor z-10"
       >
         <p class="text-xl text-center font-bold p-2 text-slate-500">
-          New Blotter
+          New Complaint
         </p>
         <div class="">
           <Inputs

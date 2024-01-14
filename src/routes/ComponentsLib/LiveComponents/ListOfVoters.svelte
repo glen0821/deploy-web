@@ -163,7 +163,7 @@
         </div>
 
         <div class="">
-          <Button TITLE="Print" on:click={() => showPrintModel.set(true)} />
+          <Button TITLE="Print report" on:click={() => showPrintModel.set(true)} />
         </div>
       </div>
 

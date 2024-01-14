@@ -15,7 +15,7 @@
   } from "../BoundComponents/clickOutside";
 
   import { showPrintModel, formattedDate } from "./stateStore";
-  import bgyClearance from "../Images/bgyClearance.jpg";
+  import bgyCle from "../Images/bgyClearance.jpg";
 
   //database calls and hooks
   import { auth, db } from "../../db/firebase";
@@ -236,7 +236,7 @@
             class="text-xs py-2 px-4 bg-orange-300 rounded-lg hover:bg-orange-400 hover:scale-105 duration-700 font-bold hover:text-white"
             on:click={() => {$showPrintModel = true;}}
           >
-            Print
+            Print report
           </button>
         </div>
       </div>
@@ -263,7 +263,7 @@
               {#if !$printing}
                 <div class="">
                   <Button
-                    TITLE="Print Now"
+                    TITLE="Print"
                     on:click={() => {
                       $printing = true;
                       // print();

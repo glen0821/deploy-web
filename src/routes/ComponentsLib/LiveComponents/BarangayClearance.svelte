@@ -224,7 +224,7 @@
 
         <div class="">
           <Button
-            TITLE="Generate Barangay Clearance"
+            TITLE="Print report"
             on:click={() => showPrintModel.set(true)}
           />
         </div>
