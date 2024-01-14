@@ -191,7 +191,7 @@
 
         <div class="">
           <Button
-            TITLE="Generate Barangay ID"
+            TITLE="Print report"
             on:click={() => showPrintModel.set(true)}
           />
         </div>

@@ -99,7 +99,7 @@
           <span>
             <i class="fi fi-rr-vote-yea"></i>
           </span>
-         <span>register voters</span> 
+         <span>Regitered voters</span> 
         </p>
       </div>
     </div>
@@ -135,7 +135,7 @@
         </div>
         <div class="max- bg-white rounded-lg drop-shadow-sm">
           <p class="text-3xl font-bold p-14  text-black capitalize hover:scale-105 duration-700">
-            <span><i class="fi fi-rr-diploma"></i></span>
+            <span><i class="fi fi-rr-memo"></i></span>
             <span>
               Total certificate
             </span>
@@ -162,6 +162,26 @@
           </p>
         </div>
       </div>
+
+      <!--TOTAL INDIGENCY REQUEST-->
+    <div in:fly={{ y: 300, duration: 1000 }}>
+      <div
+        class="text-xs font-bold text-black px-2 py-1 bg-orange-300 rounded-full m-2 absolute z-10"
+      >
+        {counter4}
+      </div>
+      <div class="max- bg-white rounded-lg drop-shadow-sm">
+        <p class="text-3xl font-bold p-14  text-black capitalize hover:scale-105 duration-700">
+
+          <span>
+            <i class="fi fi-rr-memo"></i>
+          </span>
+          <span>
+            total Indigency
+          </span>
+        </p>
+      </div>
+    </div>
   
 
     <!--TOTAL OF COMPLAINT-->

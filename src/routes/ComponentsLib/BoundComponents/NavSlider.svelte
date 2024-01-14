@@ -11,8 +11,8 @@
   import brgyID from "../Images/SVGs/brgyID.svg";
   import bgryCert from "../Images/SVGs/brgyCert.svg";
   import brgyClear from "../Images/SVGs/brgyClear.svg";
+  import brgyIndi from "../Images/SVGs/brgyIndi.svg";
   import complaints from "../Images/SVGs/complaints.svg";
-
   import Button from "../GeneralComponents/Button.svelte";
 
   //slider list of menu
@@ -22,6 +22,7 @@
     "Barangay ID",
     "Barangay Certificate",
     "Barangay Clearance",
+    "Barangay Indigency",
     "Complaints",
   ];
 
@@ -50,7 +51,12 @@
       svg: brgyClear,
       nav: "Barangay Clearance",
     },
-
+    
+    {
+      svg: brgyClear,
+      nav: "Barangay Indigency",
+    },
+    
     {
       svg: complaints,
       nav: "Complaints",

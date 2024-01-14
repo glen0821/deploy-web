@@ -190,7 +190,7 @@
             {#if !$printing}
               <div class="">
                 <Button
-                  TITLE="Print Now"
+                  TITLE="Print report"
                   on:click={() => {
                     $printing = true;
                     // print();
