@@ -34,6 +34,14 @@ export const compareClearanceValue = writable("");
 //complaints
 export const onSnapsComplaint = writable([]);
 export const showComplaintAddModal = writable(false);
-export const printing = writable(false);
 export const compareComplaintValue = writable("");
 
+
+//indigency
+export const onSnapsIndigency = writable([]);
+export const showIndigencyAddModal = writable(false);
+export const compareIndigencyValue = writable("");
+
+
+//global
+export const printing = writable(false);

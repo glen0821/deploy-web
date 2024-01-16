@@ -154,7 +154,7 @@
   };
 </script>
 
-<div class="m-2 mx-auto text-xs w-full min-h-screen">
+<div class="m-2 mx-auto text-xs w-full min-h-screen" style="margin-bottom: {showPrintModel? "20vh" : "0px"}">
   <div class="h-full w-full p-10 relative">
     <div class=" flex gap-2 items-center mb-2">
       <div class="w-full flex gap-2">
@@ -185,8 +185,8 @@
     {#if $showPrintModel}
     <div class="fixed bottom-0 top-0 left-0 right-0 bg-white">
       <div class="mx-auto max-w-[1000px] mt-[20vh] p-10">
-        <div class="fixed bottom-0 right-0 p-10">
-          <div class="flex gap-2">
+        <div class="fixed bottom-0 right-0 p-10" style="bottom: -10px !important;">
+          <div class="flex gap-2" >
             {#if !$printing}
               <div class="">
                 <Button
@@ -203,7 +203,7 @@
                   }}
                 />
               </div>
-              <div class="">
+              <div class="" >
                 <Button
                   TITLE="Close"
                   on:click={() => showPrintModel.set(false)}
