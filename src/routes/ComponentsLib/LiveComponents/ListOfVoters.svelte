@@ -10,7 +10,7 @@
     showAdd,
     onSnaps,
     compareValue,
-    printing
+    printing,
   } from "../BoundComponents/clickOutside";
 
   //database calls and hooks
@@ -38,7 +38,10 @@
 
   //handler for send data of addVoter
   const listOfVotersStore = {
-    completeName: "",
+    firstName: "",
+    middleInitial: "",
+    lastName: "",
+    suffixName: "",
     precintNum: "",
     completeAddress: "",
     kwiri: "",
@@ -48,12 +51,18 @@
     const colRef = collection(db, "votersList");
     await addDoc(colRef, {
       createdAt: serverTimestamp(),
-      completeName: listOfVotersStore.completeName.BINDTHIS,
+      firstName: listOfVotersStore.firstName.BINDTHIS,
+      middleInitial: listOfVotersStore.middleInitial.BINDTHIS,
+      lastName: listOfVotersStore.lastName.BINDTHIS,
+      suffixName: listOfVotersStore.suffixName.BINDTHIS,
       precintNumber: listOfVotersStore.precintNum.BINDTHIS,
       completeAddress: listOfVotersStore.completeAddress.BINDTHIS,
       voterCounter: increment(1),
     }).then(() => {
-      listOfVotersStore.completeName.BINDTHIS = "";
+      listOfVotersStore.firstName.BINDTHIS = "";
+      listOfVotersStore.lastName.BINDTHIS = "";
+      listOfVotersStore.middleInitial.BINDTHIS = "";
+      listOfVotersStore.suffixName.BINDTHIS = "";
       listOfVotersStore.precintNum.BINDTHIS = "";
       listOfVotersStore.completeAddress.BINDTHIS = "";
     });
@@ -87,8 +96,17 @@
 
   $: editModalId = null;
 
-  const openEditModal = (id) => {
-    editModalId = id;
+  const openEditModal = (voter) => {
+    editModalId = voter.id;
+    setTimeout(function () {
+      listOfVotersStore.firstName.BINDTHIS = voter.firstName;
+      listOfVotersStore.middleInitial.BINDTHIS = voter.middleInitial;
+      listOfVotersStore.lastName.BINDTHIS = voter.lastName;
+      listOfVotersStore.suffixName.BINDTHIS = voter.suffixName;
+      listOfVotersStore.precintNum.BINDTHIS = voter.precintNumber;
+      listOfVotersStore.completeAddress.BINDTHIS = voter.completeAddress;
+
+    }, 100);
   };
 
   const detectInputs = () => {
@@ -131,13 +149,19 @@
       docRef,
       {
         lastUpdated: serverTimestamp(),
-        completeName: listOfVotersStore.completeName.BINDTHIS,
+        firstName: listOfVotersStore.firstName.BINDTHIS,
+        middleInitial: listOfVotersStore.middleInitial.BINDTHIS,
+        lastName: listOfVotersStore.lastName.BINDTHIS,
+        suffixName: listOfVotersStore.suffixName.BINDTHIS,
         precintNumber: listOfVotersStore.precintNum.BINDTHIS,
         completeAddress: listOfVotersStore.completeAddress.BINDTHIS,
       },
       { merge: true }
     ).then(() => {
-      listOfVotersStore.completeName.BINDTHIS = "";
+      listOfVotersStore.firstName.BINDTHIS = "Hello";
+      listOfVotersStore.lastName.BINDTHIS = "";
+      listOfVotersStore.middleInitial.BINDTHIS = "";
+      listOfVotersStore.suffixName.BINDTHIS = "";
       listOfVotersStore.precintNum.BINDTHIS = "";
       listOfVotersStore.completeAddress.BINDTHIS = "";
     });
@@ -154,7 +178,10 @@
   };
 </script>
 
-<div class="m-2 mx-auto text-xs w-full min-h-screen" style="margin-bottom: {showPrintModel? "20vh" : "0px"}">
+<div
+  class="m-2 mx-auto text-xs w-full min-h-screen"
+  style="margin-bottom: {showPrintModel ? '20vh' : '0px'}"
+>
   <div class="h-full w-full p-10 relative">
     <div class=" flex gap-2 items-center mb-2">
       <div class="w-full flex gap-2">
@@ -163,7 +190,10 @@
         </div>
 
         <div class="">
-          <Button TITLE="Print report" on:click={() => showPrintModel.set(true)} />
+          <Button
+            TITLE="Print report"
+            on:click={() => showPrintModel.set(true)}
+          />
         </div>
       </div>
 
@@ -183,38 +213,41 @@
     </div>
 
     {#if $showPrintModel}
-    <div class="fixed bottom-0 top-0 left-0 right-0 bg-white">
-      <div class="mx-auto max-w-[1000px] mt-[20vh] p-10">
-        <div class="fixed bottom-0 right-0 p-10" style="bottom: -10px !important;">
-          <div class="flex gap-2" >
-            {#if !$printing}
-              <div class="">
-                <Button
-                  TITLE="Print report"
-                  on:click={() => {
-                    $printing = true;
-                    // print();
-                    // $printing = false;
-                    setTimeout(() => print(), 100);
-                    setTimeout(() => {
-                      $printing = false;
-                      $showPrintModel = false;
-                    }, 2000);
-                  }}
-                />
-              </div>
-              <div class="" >
-                <Button
-                  TITLE="Close"
-                  on:click={() => showPrintModel.set(false)}
-                />
-              </div>
-            {/if}
+      <div class="fixed bottom-0 top-0 left-0 right-0 bg-white">
+        <div class="mx-auto max-w-[1000px] mt-[20vh] p-10">
+          <div
+            class="fixed bottom-0 right-0 p-10"
+            style="bottom: -10px !important;"
+          >
+            <div class="flex gap-2">
+              {#if !$printing}
+                <div class="">
+                  <Button
+                    TITLE="Print report"
+                    on:click={() => {
+                      $printing = true;
+                      // print();
+                      // $printing = false;
+                      setTimeout(() => print(), 100);
+                      setTimeout(() => {
+                        $printing = false;
+                        $showPrintModel = false;
+                      }, 2000);
+                    }}
+                  />
+                </div>
+                <div class="">
+                  <Button
+                    TITLE="Close"
+                    on:click={() => showPrintModel.set(false)}
+                  />
+                </div>
+              {/if}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  {/if}
+    {/if}
 
     <!--ADD voters-->
     {#if $showAdd}
@@ -263,10 +296,14 @@
     <!--End of add voters-->
 
     <div class="w-full h-full" in:fly={{ x: 400, duration: 1000 }}>
-      <div class="relative  h-96 w-full">
+      <div class="relative h-96 w-full">
         {#if $showPrintModel}
-        <img src={reportHeader} alt="" style="margin-top: -130px; margin-bottom: 100px" />
-      {/if}
+          <img
+            src={reportHeader}
+            alt=""
+            style="margin-top: -130px; margin-bottom: 100px"
+          />
+        {/if}
         <table class="w-full text-sm text-left text-gray-500 z-0">
           <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
@@ -307,7 +344,7 @@
                     <div class="flex space-x-5">
                       <button
                         class="hover:bg-orange-300 duration-700 px-4 p-2 rounded-full hover:text-black hover:font-bold hover:scale-105"
-                        on:click={openEditModal(voter.id)}
+                        on:click={openEditModal(voter)}
                         ><i class="ri-edit-box-line text-lg" /></button
                       >
 
@@ -329,17 +366,38 @@
 
     {#if editModalId !== null}
       <div
-        class="flex flex-col w-96 h-auto bg-white gap-2 p-4 rounded-lg absolute left-1/2 right-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-slate-200 z-10"
+        class="flex flex-col w-96 h-auto bg-white gap-2 p-4 rounded-lg absolute left-1/2 right-1/2 -translate-x-1/2 -translate-y-3/4 border-2 border-slate-200 z-10"
       >
         <p class="text-xl text-center font-bold p-2 text-black">
           Modify Values
         </p>
-        <div class="flex gap-2 justify-center">
+        <div class="flex gap-2 justify-center flex-col">
           <div class="">
             <Inputs
-              TITLE="Name:"
-              PLACEHOLDER="Complete Name"
-              bind:this={listOfVotersStore.completeName}
+              TITLE="First Name"
+              PLACEHOLDER="First Name"
+              bind:this={listOfVotersStore.firstName}
+            />
+          </div>
+          <div class="">
+            <Inputs
+              TITLE="M.I."
+              PLACEHOLDER="Middle Initial"
+              bind:this={listOfVotersStore.middleInitial}
+            />
+          </div>
+          <div class="">
+            <Inputs
+              TITLE="Last Name"
+              PLACEHOLDER="Last Name"
+              bind:this={listOfVotersStore.lastName}
+            />
+          </div>
+          <div class="">
+            <Inputs
+              TITLE="Suffix"
+              PLACEHOLDER="Suffix"
+              bind:this={listOfVotersStore.suffixName}
             />
           </div>
           <div class="">
