@@ -226,8 +226,8 @@
           class="h-10 bg-slate-100 p-2 focus:outline-none"
         />
       </div>
-      <div class="w-full p-4">
-        <div class="p-10 border border-solid border-blue-500 rounded-lg">
+      <div class="w-full p-4 flex justify-center">
+        <div class="p-10 border border-solid  w-3/4 border-blue-500 rounded-lg">
           <h2 class="font-bold text-xl text-red-700">Certificate</h2>
           {#if $daily_points.length > 1}
             <Line class="ml-40 mr-10" data={chartData} />
