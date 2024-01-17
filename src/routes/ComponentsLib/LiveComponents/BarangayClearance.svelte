@@ -82,6 +82,7 @@
       fbData = [data, ...fbData];
     });
     onSnapsClearance.set(fbData);
+    console.log(fbData)
   });
 
   //removeData from database
@@ -90,7 +91,7 @@
     await deleteDoc(docRef);
   };
 
-  const updateStatus = async (userID, selectedStatus) => {
+  const updateStatus = async (userID, selectedStatus, ownerID) => {
     const docRef = doc(colRef, userID);
 
     const updatedData = {
@@ -98,6 +99,23 @@
       lastUpdated: serverTimestamp(),
     };
 
+    const notifDocRef = doc(collection(db, 'notifications'));
+    let message;
+    if(selectedStatus == "Processing"){
+      message = "Your certificate is being processed";
+    }else if (selectedStatus == "Ready for pickup"){
+      message = "Your certificate is ready for pickup, get it before or on appointed date";
+    }else{
+      message = "Your certificate has been claimed";
+    }
+    var currentDate = Date.now();
+    const notificationData = {
+      message: message,
+      userID: ownerID,
+      timestamp: currentDate,
+    }
+    console.log(notificationData)
+    await setDoc(notifDocRef, notificationData);
     await setDoc(docRef, updatedData, { merge: true });
   };
 
@@ -446,7 +464,8 @@
                     on:change={() =>
                       updateStatus(
                         barangayClearance.id,
-                        barangayClearance.status
+                        barangayClearance.status,
+                        barangayClearance.appointmentOwner,
                       )}
                   >
                     <option value="Processing">On Process</option>
