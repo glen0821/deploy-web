@@ -118,12 +118,12 @@
     const notifDocRef = doc(collection(db, "notifications"));
     let message;
     if (selectedStatus == "Processing") {
-      message = "Your certificate is being processed";
+      message = "Your clearance is being processed";
     } else if (selectedStatus == "Ready for pickup") {
       message =
-        "Your certificate is ready for pickup, get it before or on appointed date";
+        "Your clearance is ready for pickup, get it before or on appointed date";
     } else {
-      message = "Your certificate has been claimed";
+      message = "Your clearance has been claimed";
     }
     var currentDate = Date.now();
     const notificationData = {

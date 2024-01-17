@@ -68,7 +68,6 @@
     let fbData = [];
     snapshots.docs.forEach((doc) => {
       let data = { ...doc.data(), id: doc.id };
-      console.log(data);
       fbData = [data, ...fbData];
     });
     onSnapsComplaint.set(fbData);
@@ -120,13 +119,33 @@
     }
   };
 
-  const updateStatus = async (userID, selectedStatus) => {
+  const updateStatus = async (userID, selectedStatus, ownerID) => {
     const docRef = doc(colRef, userID);
     const updatedData = {
       status: selectedStatus,
       lastUpdated: serverTimestamp(),
     };
     await setDoc(docRef, updatedData, { merge: true });
+
+
+    const notifDocRef = doc(collection(db, "notifications"));
+    let message;
+    if (selectedStatus == "Processing") {
+      message = "Your complaint is being processed";
+    } else if (selectedStatus == "ProcBrgy") {
+      message =
+        "You can now proceed to barangay for your complaint at the appointed date";
+    } else {
+      message = "Your complaint has been resolved";
+    }
+    var currentDate = Date.now();
+    const notificationData = {
+      message: message,
+      userID: ownerID,
+      timestamp: currentDate,
+    };
+    console.log(notificationData);
+    await setDoc(notifDocRef, notificationData);
   };
 
   const handlerSearch = () => {
@@ -345,7 +364,7 @@
                         class="bg-white"
                         bind:value={complaintData.status}
                         on:change={() =>
-                          updateStatus(complaintData.id, complaintData.status)}
+                          updateStatus(complaintData.id, complaintData.status, complaintData.appointmentOwner)}
                       >
                         <option value="Processing">On Process</option>
                         <option value="ProcBrgy">Proceed To Barangay</option>
@@ -445,7 +464,7 @@
                         class="bg-white"
                         bind:value={complaintData.status}
                         on:change={() =>
-                          updateStatus(complaintData.id, complaintData.status)}
+                          updateStatus(complaintData.id, complaintData.status, complaintData.appointmentOwner)}
                       >
                         <option value="Processing">On Process</option>
                         <option value="ProcBrgy">Proceed To Barangay</option>

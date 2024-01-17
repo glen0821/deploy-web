@@ -7,6 +7,7 @@
   import { showSlider, navSelections } from "./clickOutside.js";
 
   import dashboardIcon from "../Images/SVGs/dashb.svg";
+  import analyticsIcon from "../Images/SVGs/analytics.svg";
   import listIcon from "../Images/SVGs/ListIcon.svg";
   import brgyID from "../Images/SVGs/brgyID.svg";
   import bgryCert from "../Images/SVGs/brgyCert.svg";
@@ -31,7 +32,10 @@
       svg: dashboardIcon,
       nav: "Dashboard",
     },
-
+    {
+      svg: analyticsIcon,
+      nav: "Analytics",
+    },
     {
       svg: listIcon,
       nav: "List of registered voters",

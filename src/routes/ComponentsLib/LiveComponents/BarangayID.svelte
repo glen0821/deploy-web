@@ -90,7 +90,7 @@
     await deleteDoc(docRef);
   };
 
-  const updateStatus = async (userID, selectedStatus) => {
+  const updateStatus = async (userID, selectedStatus, ownerID) => {
     const docRef = doc(colRef, userID);
 
     const updatedData = {
@@ -99,6 +99,25 @@
     };
 
     await setDoc(docRef, updatedData, { merge: true });
+
+    const notifDocRef = doc(collection(db, "notifications"));
+    let message;
+    if (selectedStatus == "Processing") {
+      message = "Your I.D. is being processed";
+    } else if (selectedStatus == "Ready for pickup") {
+      message =
+        "Your I.D. is ready for pickup, get it before or on appointed date";
+    } else {
+      message = "Your I.D. has been claimed";
+    }
+    var currentDate = Date.now();
+    const notificationData = {
+      message: message,
+      userID: ownerID,
+      timestamp: currentDate,
+    };
+    console.log(notificationData);
+    await setDoc(notifDocRef, notificationData);
   };
 
   //updateData from database
@@ -466,7 +485,7 @@
                       class="bg-white"
                       bind:value={barangayId.status}
                       on:change={() =>
-                        updateStatus(barangayId.id, barangayId.status)}
+                        updateStatus(barangayId.id, barangayId.status, barangayId.appointmentOwner)}
                     >
                       <option value="Processing">On Process</option>
                       <option value="Ready for pickup">For Pickup</option>

@@ -126,7 +126,6 @@
     let fbData = [];
     snapshots.docs.forEach((doc) => {
       let data = { ...doc.data(), id: doc.id };
-      console.log(data);
       fbData = [data, ...fbData];
     });
     onSnapsBgyCert.set(fbData);
@@ -138,7 +137,7 @@
     await deleteDoc(docRef);
   };
 
-  const updateStatus = async (userID, selectedStatus) => {
+  const updateStatus = async (userID, selectedStatus, ownerID) => {
     const docRef = doc(colRef, userID);
 
     const updatedData = {
@@ -147,6 +146,25 @@
     };
 
     await setDoc(docRef, updatedData, { merge: true });
+    
+    const notifDocRef = doc(collection(db, "notifications"));
+    let message;
+    if (selectedStatus == "Processing") {
+      message = "Your certificate is being processed";
+    } else if (selectedStatus == "Ready for pickup") {
+      message =
+        "Your certificate is ready for pickup, get it before or on appointed date";
+    } else {
+      message = "Your certificate has been claimed";
+    }
+    var currentDate = Date.now();
+    const notificationData = {
+      message: message,
+      userID: ownerID,
+      timestamp: currentDate,
+    };
+    console.log(notificationData);
+    await setDoc(notifDocRef, notificationData);
   };
 
   //updateData from database
@@ -485,7 +503,7 @@
                 <select
                   class="bg-white"
                   bind:value={cert.status}
-                  on:change={() => updateStatus(cert.id, cert.status)}
+                  on:change={() => updateStatus(cert.id, cert.status, cert.appointmentOwner)}
                 >
                   <option value="Processing">On Process</option>
                   <option value="Ready for pickup">For Pickup</option>

@@ -10,6 +10,7 @@
   import { auth } from "../../db/firebase";
   import { signOut } from "firebase/auth";
   import ListOfVoters from "../LiveComponents/ListOfVoters.svelte";
+  import Analytics from "../LiveComponents/Analytics.svelte";
   import BarangayId from "../LiveComponents/BarangayID.svelte";
   import BarangayCertificate from "../LiveComponents/BarangayCertificate.svelte";
   import BarangayClearance from "../LiveComponents/BarangayClearance.svelte";
@@ -55,6 +56,8 @@
   </div>
   {#if $navSelections === "Dashboard"}
     <DashBoard />
+  {:else if $navSelections === "Analytics"}
+    <Analytics />
   {:else if $navSelections === "List of registered voters"}
     <ListOfVoters />
   {:else if $navSelections === "Barangay ID"}

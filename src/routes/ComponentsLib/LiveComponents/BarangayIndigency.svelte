@@ -90,7 +90,7 @@
     await deleteDoc(docRef);
   };
 
-  const updateStatus = async (userID, selectedStatus) => {
+  const updateStatus = async (userID, selectedStatus, ownerID) => {
     const docRef = doc(colRef, userID);
 
     const updatedData = {
@@ -99,6 +99,26 @@
     };
 
     await setDoc(docRef, updatedData, { merge: true });
+
+    
+    const notifDocRef = doc(collection(db, "notifications"));
+    let message;
+    if (selectedStatus == "Processing") {
+      message = "Your indigency is being processed";
+    } else if (selectedStatus == "Ready for pickup") {
+      message =
+        "Your indigency is ready for pickup, get it before or on appointed date";
+    } else {
+      message = "Your indigency has been claimed";
+    }
+    var currentDate = Date.now();
+    const notificationData = {
+      message: message,
+      userID: ownerID,
+      timestamp: currentDate,
+    };
+    console.log(notificationData);
+    await setDoc(notifDocRef, notificationData);
   };
 
   //updateData from database
@@ -485,7 +505,8 @@
                       on:change={() =>
                         updateStatus(
                           barangayIndigency.id,
-                          barangayIndigency.status
+                          barangayIndigency.status,
+                          barangayIndigency.appointmentOwner
                         )}
                     >
                       <option value="Processing">On Process</option>
