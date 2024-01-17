@@ -386,6 +386,7 @@
               bind:this={listOfVotersStore.middleInitial}
             />
           </div>
+          
           <div class="">
             <Inputs
               TITLE="Last Name"

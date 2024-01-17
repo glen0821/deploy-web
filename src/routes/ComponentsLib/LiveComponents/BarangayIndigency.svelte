@@ -1,444 +1,483 @@
 <script>
-    import Button from "../GeneralComponents/Button.svelte";
-    import Inputs from "../GeneralComponents/Inputs.svelte";
-    import { fly } from "svelte/transition";
-  
-    import {
-      onSnapsIndigency,
-      showIndigencyAddModal,
-      compareIndigencyValue,
-      printing,
-    } from "../BoundComponents/clickOutside";
-    import { showPrintModel, formattedDate } from "./stateStore";
+  import Button from "../GeneralComponents/Button.svelte";
+  import Inputs from "../GeneralComponents/Inputs.svelte";
+  import { fly } from "svelte/transition";
 
-    import bgyClearance from "../Images/bgyClearance.jpg";
-    import PrintContent from "./PrintContent.svelte";
-  
-    //database calls and hooks
-    import { auth, db } from "../../db/firebase";
-    import {
-      onSnapshot,
-      addDoc,
-      collection,
-      serverTimestamp,
-      increment,
-      doc,
-      deleteDoc,
-      query,
-      orderBy,
-      setDoc,
-      where,
-    } from "firebase/firestore";
-  
-    //handler to show add modal
-    const toShowAddModal = () => {
-      showIndigencyAddModal.set(true);
+  import {
+    onSnapsIndigency,
+    showIndigencyAddModal,
+    compareIndigencyValue,
+    printing,
+  } from "../BoundComponents/clickOutside";
+  import { showPrintModel, formattedDate } from "./stateStore";
+
+  import bgyClearance from "../Images/bgyClearance.jpg";
+  import PrintContent from "./PrintContent.svelte";
+
+  //database calls and hooks
+  import { auth, db } from "../../db/firebase";
+  import {
+    onSnapshot,
+    addDoc,
+    collection,
+    serverTimestamp,
+    increment,
+    doc,
+    deleteDoc,
+    query,
+    orderBy,
+    setDoc,
+    where,
+  } from "firebase/firestore";
+
+  //handler to show add modal
+  const toShowAddModal = () => {
+    showIndigencyAddModal.set(true);
+  };
+
+  //barangayID varStore
+  const bgyVarStore = {
+    firstName: "",
+    lastName: "",
+    middleInitial: "",
+    suffixName: "",
+    address: "",
+    age: "",
+    lengthOfStay: "",
+    purpose: "",
+    dateOfAppointment: "",
+    kwiri: "",
+    trigger: false,
+  };
+
+  import reportHeader from "./images/header_report.png";
+
+  //submit data to database
+  const submitData = async () => {
+    const colRef = collection(db, "barangayIndigency");
+    addDoc(colRef, {
+      createdAt: serverTimestamp(),
+      bgyIndigencyCounter: increment(1),
+      firstName: bgyVarStore.firstName.BINDTHIS,
+      lastName: bgyVarStore.lastName.BINDTHIS,
+      middleInitial: bgyVarStore.middleInitial.BINDTHIS,
+      suffixName: bgyVarStore.suffixName.BINDTHIS,
+      address: bgyVarStore.address.BINDTHIS,
+      age: bgyVarStore.age.BINDTHIS,
+      lengthOfStay: bgyVarStore.lengthOfStay.BINDTHIS,
+      purpose: bgyVarStore.purpose.BINDTHIS,
+      dateOfAppointment: bgyVarStore.dateOfAppointment.BINDTHIS,
+    }).then(() => {
+      showIndigencyAddModal.set(false);
+    });
+  };
+
+  //fetch data from database
+  const colRef = collection(db, "barangayIndigency");
+  const q = query(colRef, orderBy("createdAt", "desc"));
+  onSnapshot(q, (snapshots) => {
+    let fbData = [];
+    snapshots.docs.forEach((doc) => {
+      let data = { ...doc.data(), id: doc.id };
+      fbData = [data, ...fbData];
+    });
+    onSnapsIndigency.set(fbData);
+  });
+
+  //removeData from database
+  const removeData = async (data) => {
+    const docRef = doc(colRef, data);
+    await deleteDoc(docRef);
+  };
+
+  const updateStatus = async (userID, selectedStatus) => {
+    const docRef = doc(colRef, userID);
+
+    const updatedData = {
+      status: selectedStatus,
+      lastUpdated: serverTimestamp(),
     };
-  
-    //barangayID varStore
-    const bgyVarStore = {
-      firstName: "",
-      lastName: "",
-      middleInitial: "",
-      suffixName: "",
-      address: "",
-      age: "",
-      lengthOfStay: "",
-      purpose: "",
-      dateOfAppointment: "",
-      kwiri: "",
-      trigger: false,
-    };
-  
-    import reportHeader from "./images/header_report.png";
-  
-    //submit data to database
-    const submitData = async () => {
-      const colRef = collection(db, "barangayIndigency");
-      addDoc(colRef, {
-        createdAt: serverTimestamp(),
-        bgyIndigencyCounter: increment(1),
+
+    await setDoc(docRef, updatedData, { merge: true });
+  };
+
+  //updateData from database
+  const updateData = async (data) => {
+    const docRef = doc(colRef, data);
+    await setDoc(
+      docRef,
+      {
+        lastUpdated: serverTimestamp(),
         firstName: bgyVarStore.firstName.BINDTHIS,
-        lastName: bgyVarStore.lastName.BINDTHIS,
         middleInitial: bgyVarStore.middleInitial.BINDTHIS,
+        lastName: bgyVarStore.lastName.BINDTHIS,
         suffixName: bgyVarStore.suffixName.BINDTHIS,
         address: bgyVarStore.address.BINDTHIS,
-        age: bgyVarStore.age.BINDTHIS,
         lengthOfStay: bgyVarStore.lengthOfStay.BINDTHIS,
         purpose: bgyVarStore.purpose.BINDTHIS,
         dateOfAppointment: bgyVarStore.dateOfAppointment.BINDTHIS,
-      }).then(() => {
-        showIndigencyAddModal.set(false);
+      },
+      { merge: true }
+    );
+    compareIndigencyValue.set(-1);
+  };
+
+  const editValueHandler = (data, index) => {
+    compareIndigencyValue.set(index);
+    setTimeout(function () {
+      bgyVarStore.firstName.BINDTHIS = data.firstName;
+      bgyVarStore.middleInitial.BINDTHIS = data.middleInitial;
+      bgyVarStore.lastName.BINDTHIS = data.lastName;
+      bgyVarStore.suffixName.BINDTHIS = data.suffixName;
+      bgyVarStore.address.BINDTHIS = data.address;
+      bgyVarStore.lengthOfStay.BINDTHIS = data.lengthOfStay;
+      bgyVarStore.purpose.BINDTHIS = data.purpose;
+      bgyVarStore.dateOfAppointment.BINDTHIS = fixDateFormat(
+        data.dateOfAppointment
+      );
+    }, 100);
+  };
+
+  function fixDateFormat(originalDate) {
+    // Split the date string into year, month, and day
+    var parts = originalDate.split("-");
+
+    // Pad the month part with leading zero if it's a single digit
+    parts[1] = parts[1].length === 1 ? "0" + parts[1] : parts[1];
+
+    // Pad the day part with leading zero if it's a single digit
+    parts[2] = parts[2].length === 1 ? "0" + parts[2] : parts[2];
+
+    // Reconstruct the date string with the corrected format
+    var fixedDate = parts.join("-");
+
+    return fixedDate;
+  }
+
+  const handlerSearch = () => {
+    if (bgyVarStore.trigger) {
+      const q = query(
+        colRef,
+        orderBy("createdAt", "desc"),
+        where("completeName", "==", bgyVarStore.kwiri)
+      );
+      onSnapshot(q, (snapshots) => {
+        let fbData = [];
+        snapshots.docs.forEach((doc) => {
+          let data = { ...doc.data(), id: doc.id };
+          fbData = [data, ...fbData];
+        });
+        onSnapsIndigency.set(fbData);
       });
-    };
-  
-    //fetch data from database
-    const colRef = collection(db, "barangayIndigency");
-    const q = query(colRef, orderBy("createdAt", "desc"));
-    onSnapshot(q, (snapshots) => {
-      let fbData = [];
-      snapshots.docs.forEach((doc) => {
-        let data = { ...doc.data(), id: doc.id };
-        fbData = [data, ...fbData];
+
+      bgyVarStore.trigger = false;
+    }
+  };
+
+  const detectInputs = () => {
+    if (bgyVarStore.kwiri.trim().length < 1) {
+      const q = query(colRef, orderBy("createdAt", "desc"));
+      onSnapshot(q, (snapshots) => {
+        let fbData = [];
+        snapshots.docs.forEach((doc) => {
+          let data = { ...doc.data(), id: doc.id };
+          fbData = [data, ...fbData];
+        });
+        onSnapsIndigency.set(fbData);
       });
-      onSnapsIndigency.set(fbData);
+      bgyVarStore.trigger = false;
+    } else {
+      bgyVarStore.trigger = true;
+    }
+  };
+
+  async function printPdf(dataForPrint) {
+    // console.log({ dataForPrint });
+    // printData.name = dataForPrint.completeName;
+    // printData.activity = dataForPrint.purpose;
+    // pdfElementHidden = false;
+    // const pdf = await html2pdf().set(opt).from(pdfElement).save();
+    // pdfElementHidden = true;
+    // return pdf;
+
+    printPdfTest(dataForPrint);
+
+    return true;
+  }
+  function printPdfTest(dataForPrint) {
+    const mywindow = window.open(
+      "",
+      "PRINT",
+      "height=891,width=649, initial-scale=1.0"
+    );
+    console.log(dataForPrint);
+
+    if (!mywindow) {
+      console.error("Popup blocked. Please allow popups for this site.");
+      return false;
+    }
+
+    const printContent = new PrintContent({
+      target: mywindow.document.body,
+      props: {
+        documentTitle: "hello world",
+        mywindow: mywindow,
+        ...dataForPrint,
+      },
     });
-  
-    //removeData from database
-    const removeData = async (data) => {
-      const docRef = doc(colRef, data);
-      await deleteDoc(docRef);
-    };
-  
-    const updateStatus = async (userID, selectedStatus) => {
-      const docRef = doc(colRef, userID);
-  
-      const updatedData = {
-        status: selectedStatus,
-        lastUpdated: serverTimestamp(),
-      };
-  
-      await setDoc(docRef, updatedData, { merge: true });
-    };
-  
-    //updateData from database
-    const updateData = async (data) => {
-      const docRef = doc(colRef, data);
-      setDoc(
-        docRef,
-        {
-          lastUpdated: serverTimestamp(),
-          completeName: bgyVarStore.completeName.BINDTHIS,
-          address: bgyVarStore.address.BINDTHIS,
-          birthdate: bgyVarStore.birthdate.BINDTHIS,
-          lengthOfStay: bgyVarStore.lengthOfStay.BINDTHIS,
-          purpose: bgyVarStore.purpose.BINDTHIS,
-          dateOfAppointment: bgyVarStore.dateOfAppointment.BINDTHIS,
-        },
-        { merge: true }
-      );
-    };
-  
-    //showModalComparison
-    const editValueHandler = (data) => {
-      compareIndigencyValue.set(data);
-    };
-  
-    const handlerSearch = () => {
-      if (bgyVarStore.trigger) {
-        const q = query(
-          colRef,
-          orderBy("createdAt", "desc"),
-          where("completeName", "==", bgyVarStore.kwiri)
-        );
-        onSnapshot(q, (snapshots) => {
-          let fbData = [];
-          snapshots.docs.forEach((doc) => {
-            let data = { ...doc.data(), id: doc.id };
-            fbData = [data, ...fbData];
-          });
-          onSnapsIndigency.set(fbData);
-        });
-  
-        bgyVarStore.trigger = false;
-      }
-    };
-  
-    const detectInputs = () => {
-      if (bgyVarStore.kwiri.trim().length < 1) {
-        const q = query(colRef, orderBy("createdAt", "desc"));
-        onSnapshot(q, (snapshots) => {
-          let fbData = [];
-          snapshots.docs.forEach((doc) => {
-            let data = { ...doc.data(), id: doc.id };
-            fbData = [data, ...fbData];
-          });
-          onSnapsIndigency.set(fbData);
-        });
-        bgyVarStore.trigger = false;
-      } else {
-        bgyVarStore.trigger = true;
-      }
-    };
-  
-    async function printPdf(dataForPrint) {
-      // console.log({ dataForPrint });
-      // printData.name = dataForPrint.completeName;
-      // printData.activity = dataForPrint.purpose;
-      // pdfElementHidden = false;
-      // const pdf = await html2pdf().set(opt).from(pdfElement).save();
-      // pdfElementHidden = true;
-      // return pdf;
-  
-      printPdfTest(dataForPrint);
-  
-      return true;
-    }
-    function printPdfTest(dataForPrint) {
-      const mywindow = window.open(
-        "",
-        "PRINT",
-        "height=891,width=649, initial-scale=1.0"
-      );
-      console.log(dataForPrint);
-  
-      if (!mywindow) {
-        console.error("Popup blocked. Please allow popups for this site.");
-        return false;
-      }
-  
-      const printContent = new PrintContent({
-        target: mywindow.document.body,
-        props: {
-          documentTitle: "hello world",
-          mywindow: mywindow,
-          ...dataForPrint,
-        },
-      });
-      console.log(printContent);
-  
-      // mywindow.document.close(); // Necessary for IE >= 10
-      // mywindow.focus(); // Necessary for IE >= 10
-  
-      mywindow.addEventListener("mousedown", function () {
-        // Code to execute after the print operation is complete
-        console.log("Print operation completed");
-        // Optionally, close the window after printing
-        // mywindow.print();
-        // mywindow.close();
-      });
-  
+    console.log(printContent);
+
+    // mywindow.document.close(); // Necessary for IE >= 10
+    // mywindow.focus(); // Necessary for IE >= 10
+
+    mywindow.addEventListener("mousedown", function () {
+      // Code to execute after the print operation is complete
+      console.log("Print operation completed");
+      // Optionally, close the window after printing
+      // mywindow.print();
       // mywindow.close();
-  
-      return true;
-    }
-  </script>
-  
-  <div class="m-2 mx-auto text-xs" style="padding-bottom: {showPrintModel? "100px" : "0px"}">
-    <div class="min-h-[50vh] p-10">
-      <div class="flex gap-2 items-center mb-2">
-        <div class="w-full flex gap-2">
-          <div class="">
-            <Button TITLE="Add Barangay Indigency" on:click={toShowAddModal} />
-          </div>
-  
-          <div class="">
-            <Button
-              TITLE="Generate Barangay Indigency"
-              on:click={() => showPrintModel.set(true)}
-            />
-          </div>
+    });
+
+    // mywindow.close();
+
+    return true;
+  }
+</script>
+
+<div
+  class="m-2 mx-auto text-xs"
+  style="padding-bottom: {showPrintModel ? '100px' : '0px'}"
+>
+  <div class="min-h-[50vh] p-10">
+    <div class="flex gap-2 items-center mb-2">
+      <div class="w-full flex gap-2">
+        <div class="">
+          <Button TITLE="Add Barangay Indigency" on:click={toShowAddModal} />
         </div>
-  
-        <div class="flex flex-row-reverse items-center w-full">
-          <button
-            class="bg-blue-400 text-white absolute p-2 border-r-2 border-black hover:bg-blue-700 font-bold"
-            on:click={handlerSearch}>Search</button
-          >
-          <input
-            type="text"
-            placeholder="Complete Name Only"
-            class="w-[40%] p-2 focus:outline-none border-2 border-black"
-            on:keyup={detectInputs}
-            bind:value={bgyVarStore.kwiri}
+
+        <div class="">
+          <Button
+            TITLE="Generate Barangay Indigency"
+            on:click={() => showPrintModel.set(true)}
           />
         </div>
-  
-        {#if $showPrintModel}
-          <div class="fixed bottom-0 top-0 left-0 right-0 bg-white">
-            <div class="mx-auto max-w-[1000px] mt-[20vh] p-10">
-              <div class="fixed bottom-0 right-0 p-10"  style="bottom: -10px !important;">
-                <div class="flex gap-2">
-                  {#if !$printing}
-                    <div class="">
-                      <Button
-                        TITLE="Print Now"
-                        on:click={() => {
-                          $printing = true;
-                          // print();
-                          // $printing = false;
-                          setTimeout(() => print(), 100);
-                          setTimeout(() => {
-                            $printing = false;
-                            $showPrintModel = false;
-                          }, 2000);
-                        }}
-                      />
-                    </div>
-                    <div class="">
-                      <Button
-                        TITLE="Close"
-                        on:click={() => showPrintModel.set(false)}
-                      />
-                    </div>
-                  {/if}
-                </div>
+      </div>
+
+      <div class="flex flex-row-reverse items-center w-full">
+        <button
+          class="bg-blue-400 text-white absolute p-2 border-r-2 border-black hover:bg-blue-700 font-bold"
+          on:click={handlerSearch}>Search</button
+        >
+        <input
+          type="text"
+          placeholder="Complete Name Only"
+          class="w-[40%] p-2 focus:outline-none border-2 border-black"
+          on:keyup={detectInputs}
+          bind:value={bgyVarStore.kwiri}
+        />
+      </div>
+
+      {#if $showPrintModel}
+        <div class="fixed bottom-0 top-0 left-0 right-0 bg-white">
+          <div class="mx-auto max-w-[1000px] mt-[20vh] p-10">
+            <div
+              class="fixed bottom-0 right-0 p-10"
+              style="bottom: -10px !important;"
+            >
+              <div class="flex gap-2">
+                {#if !$printing}
+                  <div class="">
+                    <Button
+                      TITLE="Print Now"
+                      on:click={() => {
+                        $printing = true;
+                        // print();
+                        // $printing = false;
+                        setTimeout(() => print(), 100);
+                        setTimeout(() => {
+                          $printing = false;
+                          $showPrintModel = false;
+                        }, 2000);
+                      }}
+                    />
+                  </div>
+                  <div class="">
+                    <Button
+                      TITLE="Close"
+                      on:click={() => showPrintModel.set(false)}
+                    />
+                  </div>
+                {/if}
               </div>
             </div>
           </div>
-        {/if}
-      </div>
-  
-      {#if $showIndigencyAddModal}
-        <div
-          class="flex flex-col gap-2 bg-white p-4 max-w-fit mx-auto rounded-lg mt-2 absolute left-0 right-0 border-2 border-guiColor z-10"
-        >
-          <p class="text-xl text-center font-bold p-2 text-slate-500">
-            New Barangay Clearance
-          </p>
-          <div class="flex justify-center gap-2">
-            <div class="">
-              <Inputs
-                TITLE="First Name"
-                PLACEHOLDER="First Name"
-                bind:this={bgyVarStore.firstName}
-              />
-            </div>
-            <div class="">
-              <Inputs
-                TITLE="M.I."
-                PLACEHOLDER="M.I."
-                bind:this={bgyVarStore.middleInitial}
-              />
-            </div>
-          </div>
-          <div class="flex justify-center gap-2">
-            <div class="">
-              <Inputs
-                TITLE="Last Name"
-                PLACEHOLDER="Last Name"
-                bind:this={bgyVarStore.lastName}
-              />
-            </div>
-            <div class="">
-              <Inputs
-                TITLE="Suffix"
-                PLACEHOLDER="Suffix"
-                bind:this={bgyVarStore.suffixName}
-              />
-            </div>
-          </div>
-  
-          <div class="flex justify-center gap-2">
-            <div class="">
-              <Inputs
-                TITLE="Length of stay"
-                PLACEHOLDER="Length of stay"
-                bind:this={bgyVarStore.lengthOfStay}
-              />
-            </div>
-            <div class="">
-              <Inputs
-                TITLE="Purpose"
-                PLACEHOLDER="purpose"
-                bind:this={bgyVarStore.purpose}
-              />
-            </div>
-          </div>
-  
-          <div class="flex justify-center gap-2">
-            <div class="w-full">
-              <Inputs
-                TITLE="Age"
-                PLACEHOLDER="18"
-                TYPE="number"
-                bind:this={bgyVarStore.age}
-              />
-            </div>
-          </div>
-  
+        </div>
+      {/if}
+    </div>
+
+    {#if $showIndigencyAddModal}
+      <div
+        class="flex flex-col gap-2 bg-white p-4 max-w-fit mx-auto rounded-lg mt-2 absolute left-0 right-0 border-2 border-guiColor z-10"
+      >
+        <p class="text-xl text-center font-bold p-2 text-slate-500">
+          New Barangay Clearance
+        </p>
+        <div class="flex justify-center gap-2">
           <div class="">
             <Inputs
-              TITLE="Complete Address:"
-              PLACEHOLDER="Complete Address"
-              bind:this={bgyVarStore.address}
+              TITLE="First Name"
+              PLACEHOLDER="First Name"
+              bind:this={bgyVarStore.firstName}
             />
           </div>
-  
           <div class="">
             <Inputs
-              TITLE="Date Of Appointment:"
-              TYPE="date"
-              PLACEHOLDER=""
-              bind:this={bgyVarStore.dateOfAppointment}
-            />
-          </div>
-  
-          <div class="flex gap-2">
-            <Button TITLE="Submit" on:click={submitData} />
-            <Button
-              TITLE="Cancel"
-              on:click={() => {
-                showIndigencyAddModal.set(false);
-              }}
+              TITLE="M.I."
+              PLACEHOLDER="M.I."
+              bind:this={bgyVarStore.middleInitial}
             />
           </div>
         </div>
-      {/if}
-      <div class="" in:fly={{ x: -400, duration: 1000 }}>
-        <div class="relative">
-          {#if $showPrintModel}
-            <img src={reportHeader} alt="" style="margin-top: -130px; margin-bottom: 100px" />
-          {/if}
-          <table class="w-full text-sm text-left text-gray-500">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-              <tr>
-                <th scope="col" class="px-6 py-3"> firstname </th>
-                <th scope="col" class="px-6 py-3"> MI </th>
-                <th scope="col" class="px-6 py-3"> lastname </th>
-                <th scope="col" class="px-6 py-3"> suffix </th>
-                <th scope="col" class="px-6 py-3"> address </th>
-                <th scope="col" class="px-6 py-3"> age </th>
-                <th scope="col" class="px-6 py-3"> length of stay </th>
-                <th scope="col" class="px-6 py-3"> purpose </th>
-                <th scope="col" class="px-6 py-3"> date of appointment </th>
-                <th scope="col" class="px-6 py-3"> status </th>
-                {#if !$showPrintModel}
+        <div class="flex justify-center gap-2">
+          <div class="">
+            <Inputs
+              TITLE="Last Name"
+              PLACEHOLDER="Last Name"
+              bind:this={bgyVarStore.lastName}
+            />
+          </div>
+          <div class="">
+            <Inputs
+              TITLE="Suffix"
+              PLACEHOLDER="Suffix"
+              bind:this={bgyVarStore.suffixName}
+            />
+          </div>
+        </div>
+
+        <div class="flex justify-center gap-2">
+          <div class="">
+            <Inputs
+              TITLE="Length of stay"
+              PLACEHOLDER="Length of stay"
+              bind:this={bgyVarStore.lengthOfStay}
+            />
+          </div>
+          <div class="">
+            <Inputs
+              TITLE="Purpose"
+              PLACEHOLDER="purpose"
+              bind:this={bgyVarStore.purpose}
+            />
+          </div>
+        </div>
+
+        <div class="flex justify-center gap-2">
+          <div class="w-full">
+            <Inputs
+              TITLE="Age"
+              PLACEHOLDER="18"
+              TYPE="number"
+              bind:this={bgyVarStore.age}
+            />
+          </div>
+        </div>
+
+        <div class="">
+          <Inputs
+            TITLE="Complete Address:"
+            PLACEHOLDER="Complete Address"
+            bind:this={bgyVarStore.address}
+          />
+        </div>
+
+        <div class="">
+          <Inputs
+            TITLE="Date Of Appointment:"
+            TYPE="date"
+            PLACEHOLDER=""
+            bind:this={bgyVarStore.dateOfAppointment}
+          />
+        </div>
+
+        <div class="flex gap-2">
+          <Button TITLE="Submit" on:click={submitData} />
+          <Button
+            TITLE="Cancel"
+            on:click={() => {
+              showIndigencyAddModal.set(false);
+            }}
+          />
+        </div>
+      </div>
+    {/if}
+    <div class="" in:fly={{ x: -400, duration: 1000 }}>
+      <div class="relative">
+        {#if $showPrintModel}
+          <img
+            src={reportHeader}
+            alt=""
+            style="margin-top: -130px; margin-bottom: 100px"
+          />
+        {/if}
+        <table class="w-full text-sm text-left text-gray-500">
+          <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3"> firstname </th>
+              <th scope="col" class="px-6 py-3"> MI </th>
+              <th scope="col" class="px-6 py-3"> lastname </th>
+              <th scope="col" class="px-6 py-3"> suffix </th>
+              <th scope="col" class="px-6 py-3"> address </th>
+              <th scope="col" class="px-6 py-3"> age </th>
+              <th scope="col" class="px-6 py-3"> length of stay </th>
+              <th scope="col" class="px-6 py-3"> purpose </th>
+              <th scope="col" class="px-6 py-3"> date of appointment </th>
+              <th scope="col" class="px-6 py-3"> status </th>
+              {#if !$showPrintModel}
                 <th scope="col" class="px-6 py-3"> action </th>
-                {/if}
-              </tr>
-            </thead>
-            <tbody>
-              {#each $onSnapsIndigency as barangayIndigency, i}
-                <!-- {console.log(barangayIndigency)} -->
-                <tr class="bg-white border-b">
-                  <th
-                    scope="row"
-                    class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
-                  >
-                    {barangayIndigency.firstName}
-                  </th>
-                  <td class="px-6 py-4">
-                    {barangayIndigency.middleInitial}
-                  </td>
-                  <td class="px-6 py-4">
-                    {barangayIndigency.lastName}
-                  </td>
-                  <td class="px-6 py-4">
-                    {barangayIndigency.suffixName}
-                  </td>
-                  <td class="px-6 py-4">
-                    {barangayIndigency.address}
-                  </td>
-                  <td class="px-6 py-4">
-                    {barangayIndigency.age}
-                  </td>
-                  <td class="px-6 py-4">
-                    {barangayIndigency.lengthOfStay}
-                  </td>
-                  <td class="px-6 py-4">
-                    {barangayIndigency.purpose}
-                  </td>
-                  <td class="px-6 py-4">
-                    {barangayIndigency.dateOfAppointment}
-                  </td>
-                  {#if $showPrintModel}
-  
+              {/if}
+            </tr>
+          </thead>
+          <tbody>
+            {#each $onSnapsIndigency as barangayIndigency, i}
+              <!-- {console.log(barangayIndigency)} -->
+              <tr class="bg-white border-b">
+                <th
+                  scope="row"
+                  class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
+                >
+                  {barangayIndigency.firstName}
+                </th>
+                <td class="px-6 py-4">
+                  {barangayIndigency.middleInitial}
+                </td>
+                <td class="px-6 py-4">
+                  {barangayIndigency.lastName}
+                </td>
+                <td class="px-6 py-4">
+                  {barangayIndigency.suffixName}
+                </td>
+                <td class="px-6 py-4">
+                  {barangayIndigency.address}
+                </td>
+                <td class="px-6 py-4">
+                  {barangayIndigency.age}
+                </td>
+                <td class="px-6 py-4">
+                  {barangayIndigency.lengthOfStay}
+                </td>
+                <td class="px-6 py-4">
+                  {barangayIndigency.purpose}
+                </td>
+                <td class="px-6 py-4">
+                  {barangayIndigency.dateOfAppointment}
+                </td>
+                {#if $showPrintModel}
                   <td class="px-6 py-4">
                     {barangayIndigency.status}
                   </td>
-                  {/if}
-                  {#if !$showPrintModel}
+                {/if}
+                {#if !$showPrintModel}
                   <td class="px-6 py-4">
                     <select
                       class="bg-white"
@@ -459,16 +498,16 @@
                       <button
                         class="hover:bg-orange-300 rounded-full px-4 py-2 hover:scale-105 duration-700"
                         on:click={() => {
-                          editValueHandler(i);
+                          editValueHandler(barangayIndigency,i);
                         }}><i class="ri-pencil-line"></i></button
                       >
-  
+
                       <button
                         class="hover:bg-red-500 rounded-full px-4 py-2 hover:scale-105 duration-700 text-red-900 hover:text-white"
                         on:click={removeData(barangayIndigency.id)}
                         ><i class="ri-delete-bin-line"></i></button
                       >
-  
+
                       <button
                         class="hover:bg-blue-500 rounded-full px-4 py-2 hover:scale-105 duration-700 text-blue-900 hover:text-white"
                         on:click={() => printPdf(barangayIndigency)}
@@ -476,93 +515,115 @@
                       >
                     </div>
                   </td>
-                  {/if}
-                </tr>
-                {#if $compareIndigencyValue === i}
-                  <div class="">
-                    <div
-                      class="flex flex-col gap-2 p-4 max-w-fit mx-auto rounded-lg mt-2 absolute left-0 right-0 border-2 border-slate-200 z-10"
-                    >
-                      <p class="text-xl text-center font-bold p-2 text-slate-500">
-                        Modify Values
-                      </p>
+                {/if}
+              </tr>
+              {#if $compareIndigencyValue === i}
+                <div class="">
+                  <div
+                    class="flex bg-white flex-col gap-2 p-4 max-w-fit mx-auto rounded-lg mt-2 absolute left-0 right-0 border-2 border-slate-200 z-10"
+                  >
+                    <p class="text-xl text-center font-bold p-2 text-slate-500">
+                      Modify Values
+                    </p>
+                    <div class="">
+                      <Inputs
+                        TITLE="First Name"
+                        PLACEHOLDER="First Name"
+                        bind:this={bgyVarStore.firstName}
+                      />
+                    </div>
+                    <div class="">
+                      <Inputs
+                        TITLE="M.I."
+                        PLACEHOLDER="Middle Initial"
+                        bind:this={bgyVarStore.middleInitial}
+                      />
+                    </div>
+
+                    <div class="">
+                      <Inputs
+                        TITLE="Last Name"
+                        PLACEHOLDER="Last Name"
+                        bind:this={bgyVarStore.lastName}
+                      />
+                    </div>
+                    <div class="">
+                      <Inputs
+                        TITLE="Suffix"
+                        PLACEHOLDER="Suffix"
+                        bind:this={bgyVarStore.suffixName}
+                      />
+                    </div>
+
+                    <div class="flex justify-center gap-2">
                       <div class="">
                         <Inputs
-                          TITLE="Complete Name:"
-                          PLACEHOLDER="Complete Name"
-                          bind:this={bgyVarStore.completeName}
+                          TITLE="Length of stay"
+                          PLACEHOLDER="Length of stay"
+                          bind:this={bgyVarStore.lengthOfStay}
                         />
                       </div>
-  
-                      <div class="flex justify-center gap-2">
-                        <div class="">
-                          <Inputs
-                            TITLE="Length of stay"
-                            PLACEHOLDER="Length of stay"
-                            bind:this={bgyVarStore.lengthOfStay}
-                          />
-                        </div>
-                        <div class="">
-                          <Inputs
-                            TITLE="Purpose"
-                            PLACEHOLDER="purpose"
-                            bind:this={bgyVarStore.purpose}
-                          />
-                        </div>
-                      </div>
-  
-                      <div class="flex justify-center gap-2">
-                        <div class="w-full">
-                          <Inputs
-                            TITLE="Birthdate:"
-                            TYPE="date"
-                            bind:this={bgyVarStore.birthdate}
-                          />
-                        </div>
-                      </div>
-  
                       <div class="">
                         <Inputs
-                          TITLE="Complete Address:"
-                          PLACEHOLDER="Complete Address"
-                          bind:this={bgyVarStore.address}
+                          TITLE="Purpose"
+                          PLACEHOLDER="purpose"
+                          bind:this={bgyVarStore.purpose}
                         />
-                      </div>
-  
-                      <div class="">
-                        <Inputs
-                          TITLE="Date Of Appointment:"
-                          TYPE="date"
-                          PLACEHOLDER=""
-                          bind:this={bgyVarStore.dateOfAppointment}
-                        />
-                      </div>
-  
-                      <div class="flex gap-2">
-                        <button
-                          class="bg-orange-300 px-4 py-2 rounded-lg w-1/2"
-                          on:click={updateData(barangayIndigency.id)}
-                        >
-                          Update
-                        </button>
-                        <button
-                          class="bg-red-300 px-4 py-2 rounded-lg w-1/2"
-                          on:click={() => {
-                            compareIndigencyValue.set("");
-                          }}
-                        >
-                          Cancel
-                        </button>
                       </div>
                     </div>
+
+                    <div class="flex justify-center gap-2">
+                      <div class="w-full">
+                        <Inputs
+                          TITLE="Birthdate:"
+                          TYPE="date"
+                          bind:this={bgyVarStore.birthdate}
+                        />
+                      </div>
+                    </div>
+
+                    <div class="">
+                      <Inputs
+                        TITLE="Complete Address:"
+                        PLACEHOLDER="Complete Address"
+                        bind:this={bgyVarStore.address}
+                      />
+                    </div>
+
+                    <div class="">
+                      <Inputs
+                        TITLE="Date Of Appointment:"
+                        TYPE="date"
+                        PLACEHOLDER=""
+                        bind:this={bgyVarStore.dateOfAppointment}
+                      />
+                    </div>
+
+                    <div class="flex gap-2">
+                      <button
+                        class="bg-orange-300 px-4 py-2 rounded-lg w-1/2"
+                        on:click={updateData(barangayIndigency.id)}
+                      >
+                        Update
+                      </button>
+                      <button
+                        class="bg-red-300 px-4 py-2 rounded-lg w-1/2"
+                        on:click={() => {
+                          compareIndigencyValue.set("");
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
-                {/if}
-              {/each}
-            </tbody>
-          </table>
-        </div>
-  
-        <!-- {#each $onSnapsIndigency as value, i}
+                </div>
+              {/if}
+            {/each}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- {#each $onSnapsIndigency as value, i}
               <div class="flex justify-center items-center " in:fly={{x:-400, duration:1000}}>
                   <p class="w-[25%] font-bold border-b-2 border-white bg-slate-300 p-2 ">Complete Name</p>
                   <p class="w-full border-b-2 border-white bg-slate-100 p-2 ">{value.completeName}</p>
@@ -637,7 +698,6 @@
                   {/if}
               </div>
               {/each} -->
-      </div>
     </div>
   </div>
-  
+</div>

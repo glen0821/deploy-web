@@ -217,10 +217,11 @@
   <div class="mt-4">
     {#if activeTab.id === 1}
       <div class="flex justify-center items-center">
-        <p>Date</p>
+        <p>Date: </p>
         <input
           type="date"
           bind:value={selectedDate}
+          
           on:change={handleDateChange}
           class="h-10 bg-slate-100 p-2 focus:outline-none"
         />
@@ -236,9 +237,9 @@
     {/if}
     {#if activeTab.id === 2}
       <div class="flex justify-center items-center">
-        <p>Date</p>
+        <p>Date: </p>
         <input
-          type="date"
+          type="month"
           bind:value={selectedDate}
           class="h-10 bg-slate-100 p-2 focus:outline-none"
         />

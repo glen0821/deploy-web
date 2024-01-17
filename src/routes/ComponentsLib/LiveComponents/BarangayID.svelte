@@ -6,7 +6,7 @@
     onSnapsBgyID,
     compareIDvalue,
     showAddModal,
-    printing
+    printing,
   } from "../BoundComponents/clickOutside";
   import { showPrintModel, formattedDate } from "./stateStore";
   import bgyClearance from "../Images/bgyClearance.jpg";
@@ -39,6 +39,10 @@
   const bgyVarStore = {
     status: "",
     completeName: "",
+    firstName: "",
+    middleInitial: "",
+    lastName: "",
+    suffixName: "",
     address: "",
     birthdate: "",
     gender: "",
@@ -77,6 +81,7 @@
       fbData = [data, ...fbData];
     });
     onSnapsBgyID.set(fbData);
+    console.log(fbData)
   });
 
   //removeData from database
@@ -99,26 +104,69 @@
   //updateData from database
   const updateData = async (data) => {
     const docRef = doc(colRef, data);
-    setDoc(
-      docRef,
-      {
+    console.log({
         lastUpdated: serverTimestamp(),
-        completeName: bgyVarStore.completeName.BINDTHIS,
+        firstName: bgyVarStore.firstName.BINDTHIS,
+        middleInitial: bgyVarStore.middleInitial.BINDTHIS,
+        lastName: bgyVarStore.lastName.BINDTHIS,
+        suffixName: bgyVarStore.suffixName.BINDTHIS,
         address: bgyVarStore.address.BINDTHIS,
         birthdate: bgyVarStore.birthdate.BINDTHIS,
         gender: bgyVarStore.gender.BINDTHIS,
         height: bgyVarStore.height.BINDTHIS,
         weight: bgyVarStore.weight.BINDTHIS,
         dateOfAppointment: bgyVarStore.dateOfAppointment.BINDTHIS,
-        status: bgyVarStore.status.BINDTHIS,
+      },)
+    setDoc(
+      docRef,
+      {
+        lastUpdated: serverTimestamp(),
+        firstName: bgyVarStore.firstName.BINDTHIS,
+        middleInitial: bgyVarStore.middleInitial.BINDTHIS,
+        lastName: bgyVarStore.lastName.BINDTHIS,
+        suffixName: bgyVarStore.suffixName.BINDTHIS,
+        address: bgyVarStore.address.BINDTHIS,
+        birthdate: bgyVarStore.birthdate.BINDTHIS,
+        gender: bgyVarStore.gender.BINDTHIS,
+        height: bgyVarStore.height.BINDTHIS,
+        weight: bgyVarStore.weight.BINDTHIS,
+        dateOfAppointment: bgyVarStore.dateOfAppointment.BINDTHIS,
       },
       { merge: true }
     );
   };
 
+  function fixDateFormat(originalDate) {
+    // Split the date string into year, month, and day
+    var parts = originalDate.split("-");
+
+    // Pad the month part with leading zero if it's a single digit
+    parts[1] = parts[1].length === 1 ? "0" + parts[1] : parts[1];
+
+    // Pad the day part with leading zero if it's a single digit
+    parts[2] = parts[2].length === 1 ? "0" + parts[2] : parts[2];
+
+    // Reconstruct the date string with the corrected format
+    var fixedDate = parts.join("-");
+
+    return fixedDate;
+  }
+
   //showModalComparison
-  const editValueHandler = (data) => {
-    compareIDvalue.set(data);
+  const editValueHandler = (data, index) => {
+    compareIDvalue.set(index);
+    setTimeout(function () {
+      bgyVarStore.firstName.BINDTHIS = data.firstName;
+      bgyVarStore.middleInitial.BINDTHIS = data.middleInitial;
+      bgyVarStore.lastName.BINDTHIS = data.lastName;
+      bgyVarStore.suffixName.BINDTHIS = data.suffixName;
+      bgyVarStore.address.BINDTHIS = data.completeAddress;
+      bgyVarStore.height.BINDTHIS = data.height;
+      bgyVarStore.weight.BINDTHIS = data.weight;
+      bgyVarStore.dateOfAppointment.BINDTHIS = fixDateFormat(data.dateOfAppointment);
+      bgyVarStore.birthdate.BINDTHIS = fixDateFormat(data.birthdate);
+
+    }, 100);
   };
 
   const handleSearch = () => {
@@ -181,7 +229,10 @@
   }
 </script>
 
-<div class="m-2 mx-auto text-xs" style="margin-bottom: {showPrintModel? "20vh" : "0px"}">
+<div
+  class="m-2 mx-auto text-xs"
+  style="margin-bottom: {showPrintModel ? '20vh' : '0px'}"
+>
   <div class="min-h-[50vh] p-10">
     <div class=" flex gap-2 items-center mb-2">
       <div class="w-full flex gap-2">
@@ -213,38 +264,41 @@
     </div>
 
     {#if $showPrintModel}
-    <div class="fixed bottom-0 top-0 left-0 right-0 bg-white">
-      <div class="mx-auto max-w-[1000px] mt-[20vh] p-10">
-        <div class="fixed bottom-0 right-0 p-10"  style="bottom: -10px !important;">
-          <div class="flex gap-2">
-            {#if !$printing}
-              <div class="">
-                <Button
-                  TITLE="Print Now"
-                  on:click={() => {
-                    $printing = true;
-                    // print();
-                    // $printing = false;
-                    setTimeout(() => print(), 100);
-                    setTimeout(() => {
-                      $printing = false;
-                      $showPrintModel = false;
-                    }, 2000);
-                  }}
-                />
-              </div>
-              <div class="">
-                <Button
-                  TITLE="Close"
-                  on:click={() => showPrintModel.set(false)}
-                />
-              </div>
-            {/if}
+      <div class="fixed bottom-0 top-0 left-0 right-0 bg-white">
+        <div class="mx-auto max-w-[1000px] mt-[20vh] p-10">
+          <div
+            class="fixed bottom-0 right-0 p-10"
+            style="bottom: -10px !important;"
+          >
+            <div class="flex gap-2">
+              {#if !$printing}
+                <div class="">
+                  <Button
+                    TITLE="Print Now"
+                    on:click={() => {
+                      $printing = true;
+                      // print();
+                      // $printing = false;
+                      setTimeout(() => print(), 100);
+                      setTimeout(() => {
+                        $printing = false;
+                        $showPrintModel = false;
+                      }, 2000);
+                    }}
+                  />
+                </div>
+                <div class="">
+                  <Button
+                    TITLE="Close"
+                    on:click={() => showPrintModel.set(false)}
+                  />
+                </div>
+              {/if}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  {/if}
+    {/if}
 
     {#if $showAddModal}
       <div
@@ -326,13 +380,17 @@
     <div class="" in:fly={{ x: -400, duration: 1000 }}>
       <div class="relative">
         {#if $showPrintModel}
-        <img src={reportHeader} alt="" style="margin-top: -130px; margin-bottom: 100px" />
-      {/if}
+          <img
+            src={reportHeader}
+            alt=""
+            style="margin-top: -130px; margin-bottom: 100px"
+          />
+        {/if}
         <table class="w-full text-sm text-left text-gray-500">
           <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
               {#if !$showPrintModel}
-              <th scope="col" class="px-6 py-3"> ID Image </th>
+                <th scope="col" class="px-6 py-3"> ID Image </th>
               {/if}
               <th scope="col" class="px-6 py-3"> Firstname </th>
               <th scope="col" class="px-6 py-3"> MI</th>
@@ -346,25 +404,24 @@
               <th scope="col" class="px-6 py-3"> Appointment </th>
               <th scope="col" class="px-6 py-3"> status </th>
               {#if !$showPrintModel}
-              <th scope="col" class="px-6 py-3"> action </th>
+                <th scope="col" class="px-6 py-3"> action </th>
               {/if}
             </tr>
           </thead>
           <tbody>
             {#each $onSnapsBgyID as barangayId, i}
               <tr class="bg-white border-b">
-              {#if !$showPrintModel}
-
-                <th
-                  scope="row"
-                  class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
-                >
-                  <img
-                    src={barangayId.IDpictureUrl}
-                    alt="ID Picture"
-                    class="h-10 w-10 rounded-full"
-                  />
-                </th>
+                {#if !$showPrintModel}
+                  <th
+                    scope="row"
+                    class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
+                  >
+                    <img
+                      src={barangayId.IDpictureUrl}
+                      alt="ID Picture"
+                      class="h-10 w-10 rounded-full"
+                    />
+                  </th>
                 {/if}
                 <td class="px-6 py-4">
                   {barangayId.firstName}
@@ -382,7 +439,9 @@
                   {barangayId.address}
                 </td>
                 <td class="px-6 py-4">
-                  {barangayId.birthDate}
+                  {
+                    barangayId['birthdate']
+                  }
                 </td>
                 <td class="px-6 py-4">
                   {barangayId.gender}
@@ -396,60 +455,81 @@
                 <td class="px-6 py-4">
                   {barangayId.dateOfAppointment}
                 </td>
-              {#if $showPrintModel}
-              <td class="px-6 py-4">
-                {barangayId.status}
-              </td>
-{/if}
-              {#if !$showPrintModel}
-
-                <td class="px-6 py-4">
-                  <select
-                    class="bg-white"
-                    bind:value={barangayId.status}
-                    on:change={() =>
-                      updateStatus(barangayId.id, barangayId.status)}
-                  >
-                    <option value="Processing">On Process</option>
-                    <option value="Ready for pickup">For Pickup</option>
-                    <option value="Claimed">Completed</option>
-                  </select>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex gap-2">
-                    <button
-                      class="hover:bg-orange-300 hover:scale-105 px-4 py-2 rounded-full duration-700 hover:text-white"
-                      on:click={() => {
-                        editValueHandler(i);
-                      }}><i class="ri-pencil-line text-base"></i></button
+                {#if $showPrintModel}
+                  <td class="px-6 py-4">
+                    {barangayId.status}
+                  </td>
+                {/if}
+                {#if !$showPrintModel}
+                  <td class="px-6 py-4">
+                    <select
+                      class="bg-white"
+                      bind:value={barangayId.status}
+                      on:change={() =>
+                        updateStatus(barangayId.id, barangayId.status)}
                     >
-                    <button
-                      class="hover:bg-red-300 hover:scale-105 px-4 py-2 rounded-full duration-700 hover:text-white"
-                      on:click={removeData(barangayId.id)}
-                      ><i class="ri-delete-bin-line"></i></button
-                    >
-                    <button
-                      class="hover:bg-blue-500 rounded-full px-4 py-2 hover:scale-105 duration-700 text-blue-900 hover:text-white"
-                      on:click={() => printPdf(barangayId)}
-                      ><i class="ri-printer-line"></i></button
-                    >
-                  </div>
-                </td>
+                      <option value="Processing">On Process</option>
+                      <option value="Ready for pickup">For Pickup</option>
+                      <option value="Claimed">Completed</option>
+                    </select>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="flex gap-2">
+                      <button
+                        class="hover:bg-orange-300 hover:scale-105 px-4 py-2 rounded-full duration-700 hover:text-white"
+                        on:click={() => {
+                          editValueHandler(barangayId, i);
+                        }}><i class="ri-pencil-line text-base"></i></button
+                      >
+                      <button
+                        class="hover:bg-red-300 hover:scale-105 px-4 py-2 rounded-full duration-700 hover:text-white"
+                        on:click={removeData(barangayId.id)}
+                        ><i class="ri-delete-bin-line"></i></button
+                      >
+                      <button
+                        class="hover:bg-blue-500 rounded-full px-4 py-2 hover:scale-105 duration-700 text-blue-900 hover:text-white"
+                        on:click={() => printPdf(barangayId)}
+                        ><i class="ri-printer-line"></i></button
+                      >
+                    </div>
+                  </td>
                 {/if}
               </tr>
 
               {#if $compareIDvalue === i}
                 <div
-                  class="flex flex-col gap-2 p-4 max-w-fit mx-auto rounded-lg mt-2 absolute left-0 right-0 border-2 bg-gray-white z-10"
+                  class=" flex flex-col gap-2 p-4 max-w-fit mx-auto rounded-lg mt-2 absolute left-0 right-0 border-2 bg-gray-white z-10 -top-32 bg-white"
                 >
                   <p class="text-xl text-center font-bold p-2 text-slate-500">
                     Modify Values
                   </p>
                   <div class="">
                     <Inputs
-                      TITLE="Complete Name:"
-                      PLACEHOLDER="Complete Name"
-                      bind:this={bgyVarStore.completeName}
+                      TITLE="First Name"
+                      PLACEHOLDER="First Name"
+                      bind:this={bgyVarStore.firstName}
+                    />
+                  </div>
+                  <div class="">
+                    <Inputs
+                      TITLE="M.I."
+                      PLACEHOLDER="Middle Initial"
+                      bind:this={bgyVarStore.middleInitial}
+                    />
+                  </div>
+
+                  <div class="">
+                    <Inputs
+                      TITLE="Last Name"
+                      PLACEHOLDER="Last Name"
+                      bind:this={bgyVarStore.lastName}
+                    />
+                  </div>
+                  <div class="">
+                    <Inputs
+                      TITLE="Suffix"
+                      PLACEHOLDER="Suffix"
+                      bind:this={bgyVarStore.suffixName}
                     />
                   </div>
 
@@ -457,6 +537,7 @@
                     <div class="">
                       <Inputs
                         TITLE="Height"
+                        TYPE="number"
                         PLACEHOLDER="Height"
                         bind:this={bgyVarStore.height}
                       />
@@ -464,6 +545,7 @@
                     <div class="">
                       <Inputs
                         TITLE="Weight"
+                        TYPE="number"
                         PLACEHOLDER="Weight"
                         bind:this={bgyVarStore.weight}
                       />

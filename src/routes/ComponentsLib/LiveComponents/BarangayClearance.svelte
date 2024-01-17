@@ -50,6 +50,22 @@
     trigger: false,
   };
 
+  function fixDateFormat(originalDate) {
+    // Split the date string into year, month, and day
+    var parts = originalDate.split("-");
+
+    // Pad the month part with leading zero if it's a single digit
+    parts[1] = parts[1].length === 1 ? "0" + parts[1] : parts[1];
+
+    // Pad the day part with leading zero if it's a single digit
+    parts[2] = parts[2].length === 1 ? "0" + parts[2] : parts[2];
+
+    // Reconstruct the date string with the corrected format
+    var fixedDate = parts.join("-");
+
+    return fixedDate;
+  }
+
   import reportHeader from "./images/header_report.png";
 
   //submit data to database
@@ -82,7 +98,7 @@
       fbData = [data, ...fbData];
     });
     onSnapsClearance.set(fbData);
-    console.log(fbData)
+    console.log(fbData);
   });
 
   //removeData from database
@@ -99,13 +115,14 @@
       lastUpdated: serverTimestamp(),
     };
 
-    const notifDocRef = doc(collection(db, 'notifications'));
+    const notifDocRef = doc(collection(db, "notifications"));
     let message;
-    if(selectedStatus == "Processing"){
+    if (selectedStatus == "Processing") {
       message = "Your certificate is being processed";
-    }else if (selectedStatus == "Ready for pickup"){
-      message = "Your certificate is ready for pickup, get it before or on appointed date";
-    }else{
+    } else if (selectedStatus == "Ready for pickup") {
+      message =
+        "Your certificate is ready for pickup, get it before or on appointed date";
+    } else {
       message = "Your certificate has been claimed";
     }
     var currentDate = Date.now();
@@ -113,8 +130,8 @@
       message: message,
       userID: ownerID,
       timestamp: currentDate,
-    }
-    console.log(notificationData)
+    };
+    console.log(notificationData);
     await setDoc(notifDocRef, notificationData);
     await setDoc(docRef, updatedData, { merge: true });
   };
@@ -122,24 +139,37 @@
   //updateData from database
   const updateData = async (data) => {
     const docRef = doc(colRef, data);
-    setDoc(
+    await setDoc(
       docRef,
       {
         lastUpdated: serverTimestamp(),
-        completeName: bgyVarStore.completeName.BINDTHIS,
+        firstName: bgyVarStore.firstName.BINDTHIS,
+        middleInitial: bgyVarStore.middleInitial.BINDTHIS,
+        lastName: bgyVarStore.lastName.BINDTHIS,
+        suffixName: bgyVarStore.suffixName.BINDTHIS,
         address: bgyVarStore.address.BINDTHIS,
-        birthdate: bgyVarStore.birthdate.BINDTHIS,
         lengthOfStay: bgyVarStore.lengthOfStay.BINDTHIS,
         purpose: bgyVarStore.purpose.BINDTHIS,
         dateOfAppointment: bgyVarStore.dateOfAppointment.BINDTHIS,
       },
       { merge: true }
     );
+    compareClearanceValue.set(-1)
   };
 
   //showModalComparison
-  const editValueHandler = (data) => {
-    compareClearanceValue.set(data);
+  const editValueHandler = (data, index) => {
+    compareClearanceValue.set(index);
+    setTimeout(function () {
+      bgyVarStore.firstName.BINDTHIS = data.firstName;
+      bgyVarStore.middleInitial.BINDTHIS = data.middleInitial;
+      bgyVarStore.lastName.BINDTHIS = data.lastName;
+      bgyVarStore.suffixName.BINDTHIS = data.suffixName;
+      bgyVarStore.address.BINDTHIS = data.address;
+      bgyVarStore.lengthOfStay.BINDTHIS = data.lengthOfStay;
+      bgyVarStore.purpose.BINDTHIS = data.purpose;
+      bgyVarStore.dateOfAppointment.BINDTHIS = fixDateFormat(data.dateOfAppointment);
+    }, 100);
   };
 
   const handlerSearch = () => {
@@ -232,7 +262,10 @@
   }
 </script>
 
-<div class="m-2 mx-auto text-xs" style="margin-bottom: {showPrintModel? "20vh" : "0px"}">
+<div
+  class="m-2 mx-auto text-xs"
+  style="margin-bottom: {showPrintModel ? '20vh' : '0px'}"
+>
   <div class="min-h-[50vh] p-10">
     <div class="flex gap-2 items-center mb-2">
       <div class="w-full flex gap-2">
@@ -265,7 +298,10 @@
       {#if $showPrintModel}
         <div class="fixed bottom-0 top-0 left-0 right-0 bg-white">
           <div class="mx-auto max-w-[1000px] mt-[20vh] p-10">
-            <div class="fixed bottom-0 right-0 p-10"  style="bottom: -10px !important;">
+            <div
+              class="fixed bottom-0 right-0 p-10"
+              style="bottom: -10px !important;"
+            >
               <div class="flex gap-2">
                 {#if !$printing}
                   <div class="">
@@ -396,7 +432,11 @@
     <div class="" in:fly={{ x: -400, duration: 1000 }}>
       <div class="relative">
         {#if $showPrintModel}
-          <img src={reportHeader} alt="" style="margin-top: -130px; margin-bottom: 100px" />
+          <img
+            src={reportHeader}
+            alt=""
+            style="margin-top: -130px; margin-bottom: 100px"
+          />
         {/if}
         <table class="w-full text-sm text-left text-gray-500">
           <thead class="text-xs text-gray-700 uppercase bg-gray-50">
@@ -412,7 +452,7 @@
               <th scope="col" class="px-6 py-3"> date of appointment </th>
               <th scope="col" class="px-6 py-3"> status </th>
               {#if !$showPrintModel}
-              <th scope="col" class="px-6 py-3"> action </th>
+                <th scope="col" class="px-6 py-3"> action </th>
               {/if}
             </tr>
           </thead>
@@ -451,65 +491,86 @@
                   {barangayClearance.dateOfAppointment}
                 </td>
                 {#if $showPrintModel}
-
-                <td class="px-6 py-4">
-                  {barangayClearance.status}
-                </td>
+                  <td class="px-6 py-4">
+                    {barangayClearance.status}
+                  </td>
                 {/if}
                 {#if !$showPrintModel}
-                <td class="px-6 py-4">
-                  <select
-                    class="bg-white"
-                    bind:value={barangayClearance.status}
-                    on:change={() =>
-                      updateStatus(
-                        barangayClearance.id,
-                        barangayClearance.status,
-                        barangayClearance.appointmentOwner,
-                      )}
-                  >
-                    <option value="Processing">On Process</option>
-                    <option value="Ready for pickup">For Pickup</option>
-                    <option value="Claimed">Completed</option>
-                  </select>
-                </td>
-                <td>
-                  <div class="flex gap-2">
-                    <button
-                      class="hover:bg-orange-300 rounded-full px-4 py-2 hover:scale-105 duration-700"
-                      on:click={() => {
-                        editValueHandler(i);
-                      }}><i class="ri-pencil-line"></i></button
+                  <td class="px-6 py-4">
+                    <select
+                      class="bg-white"
+                      bind:value={barangayClearance.status}
+                      on:change={() =>
+                        updateStatus(
+                          barangayClearance.id,
+                          barangayClearance.status,
+                          barangayClearance.appointmentOwner
+                        )}
                     >
+                      <option value="Processing">On Process</option>
+                      <option value="Ready for pickup">For Pickup</option>
+                      <option value="Claimed">Completed</option>
+                    </select>
+                  </td>
+                  <td>
+                    <div class="flex gap-2">
+                      <button
+                        class="hover:bg-orange-300 rounded-full px-4 py-2 hover:scale-105 duration-700"
+                        on:click={() => {
+                          editValueHandler(barangayClearance, i);
+                        }}><i class="ri-pencil-line"></i></button
+                      >
 
-                    <button
-                      class="hover:bg-red-500 rounded-full px-4 py-2 hover:scale-105 duration-700 text-red-900 hover:text-white"
-                      on:click={removeData(barangayClearance.id)}
-                      ><i class="ri-delete-bin-line"></i></button
-                    >
+                      <button
+                        class="hover:bg-red-500 rounded-full px-4 py-2 hover:scale-105 duration-700 text-red-900 hover:text-white"
+                        on:click={removeData(barangayClearance.id)}
+                        ><i class="ri-delete-bin-line"></i></button
+                      >
 
-                    <button
-                      class="hover:bg-blue-500 rounded-full px-4 py-2 hover:scale-105 duration-700 text-blue-900 hover:text-white"
-                      on:click={() => printPdf(barangayClearance)}
-                      ><i class="ri-printer-line"></i></button
-                    >
-                  </div>
-                </td>
+                      <button
+                        class="hover:bg-blue-500 rounded-full px-4 py-2 hover:scale-105 duration-700 text-blue-900 hover:text-white"
+                        on:click={() => printPdf(barangayClearance)}
+                        ><i class="ri-printer-line"></i></button
+                      >
+                    </div>
+                  </td>
                 {/if}
               </tr>
               {#if $compareClearanceValue === i}
                 <div class="">
                   <div
-                    class="flex flex-col gap-2 p-4 max-w-fit mx-auto rounded-lg mt-2 absolute left-0 right-0 border-2 border-slate-200 z-10"
+                    class="flex bg-white flex-col gap-2 p-4 max-w-fit mx-auto rounded-lg mt-2 absolute left-0 right-0 border-2 border-slate-200 z-10"
                   >
                     <p class="text-xl text-center font-bold p-2 text-slate-500">
                       Modify Values
                     </p>
                     <div class="">
                       <Inputs
-                        TITLE="Complete Name:"
-                        PLACEHOLDER="Complete Name"
-                        bind:this={bgyVarStore.completeName}
+                        TITLE="First Name"
+                        PLACEHOLDER="First Name"
+                        bind:this={bgyVarStore.firstName}
+                      />
+                    </div>
+                    <div class="">
+                      <Inputs
+                        TITLE="M.I."
+                        PLACEHOLDER="Middle Initial"
+                        bind:this={bgyVarStore.middleInitial}
+                      />
+                    </div>
+
+                    <div class="">
+                      <Inputs
+                        TITLE="Last Name"
+                        PLACEHOLDER="Last Name"
+                        bind:this={bgyVarStore.lastName}
+                      />
+                    </div>
+                    <div class="">
+                      <Inputs
+                        TITLE="Suffix"
+                        PLACEHOLDER="Suffix"
+                        bind:this={bgyVarStore.suffixName}
                       />
                     </div>
 
@@ -526,16 +587,6 @@
                           TITLE="Purpose"
                           PLACEHOLDER="purpose"
                           bind:this={bgyVarStore.purpose}
-                        />
-                      </div>
-                    </div>
-
-                    <div class="flex justify-center gap-2">
-                      <div class="w-full">
-                        <Inputs
-                          TITLE="Birthdate:"
-                          TYPE="date"
-                          bind:this={bgyVarStore.birthdate}
                         />
                       </div>
                     </div>
