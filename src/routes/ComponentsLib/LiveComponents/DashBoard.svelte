@@ -83,6 +83,17 @@
     });
     counter5 = counterConvert;
   });
+
+  let counter6 = 0;
+  const colRef6 = collection(db, "barangayIndigency");
+  onSnapshot(colRef6, (snapshots) => {
+    let counterConvert = 0;
+    snapshots.docs.forEach((doc) => {
+      let fbStoreCount = Number(doc.data().bgyClearanceCounter);
+      counterConvert += fbStoreCount;
+    });
+    counter6 = counterConvert;
+  });
 </script>
 
 <div class="flex w-full bg-gray-100 min-h-screen justify-center">
@@ -168,7 +179,7 @@
       <div
         class="text-xs font-bold text-black px-2 py-1 bg-orange-300 rounded-full m-2 absolute z-10"
       >
-        {counter4}
+        {counter6}
       </div>
       <div class="max- bg-white rounded-lg drop-shadow-sm">
         <p class="text-3xl font-bold p-14  text-black capitalize hover:scale-105 duration-700">
