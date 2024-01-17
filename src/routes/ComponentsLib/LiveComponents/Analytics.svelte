@@ -20,7 +20,7 @@
   import { onMount } from "svelte";
   import { fly } from "svelte/transition";
   import { Line } from "svelte-chartjs";
-  import { data as daily_data, points as daily_points } from "./daily_data.js";
+  import { data as daily_data, dataset} from "./daily_data.js";
   import {
     Chart as ChartJS,
     Tooltip,
@@ -71,9 +71,8 @@
       onSnaps.set(fbData);
       console.log(fbData.length);
       const date = selectedDate.split("-");
-      const points = getDayAnalytics(date[0], date[1], date[2], fbData);
-      console.log(points);
-      daily_points.set(points);
+      const dtst = getDayAnalytics(date[0], date[1], date[2], fbData);
+      dataset.set(dtst);
       updateChart();
     });
   };
@@ -109,6 +108,14 @@
   };
 
   const getDayAnalytics = (year, month, day, analytics) => {
+    const dataset = {
+      "certificate": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,],
+      "clearance": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,],
+      "indigency": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,],
+      "complaint": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,],
+      "voter": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,],
+      "id": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,]
+    }
     const hours = [
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     ];
@@ -120,10 +127,10 @@
         data.month == parseInt(month) &&
         data.day == day
       ) {
-        hours[data.hour - 1]++;
+        dataset[data.type][data.hour - 1]++;
       }
     }
-    return hours;
+    return dataset;
   };
 
   function handleDateChange(event) {
@@ -141,11 +148,22 @@
   }
 
   let chartData = {};
+  let chartDataset = {}
 
   function updateChart() {
     // Update the data prop with the new daily_points value
-    chartData = {
-      labels: [
+    const categories = [
+      'certificate',
+      'voter',
+      'clearance',
+      'indigency',
+      'complaint',
+      'id'
+    ]
+    for(let i = 0; i < categories.length; i++){
+      let labels = []
+      if(activeTab.id == 1) {
+        labels = [
         "1:00",
         "02:00",
         "03:00",
@@ -170,7 +188,10 @@
         "22:00",
         "23:00",
         "24:00",
-      ],
+      ]
+      }
+      chartDataset[categories[i]] = {
+      labels: labels,
       datasets: [
         {
           label: "",
@@ -184,17 +205,22 @@
           borderJoinStyle: "miter",
           pointBorderColor: "rgb(205, 130,1 58)",
           pointBackgroundColor: "rgb(255, 255, 255)",
-          pointBorderWidth: 10,
+          pointBorderWidth: 2,
           pointHoverRadius: 5,
           pointHoverBackgroundColor: "rgb(0, 0, 0)",
           pointHoverBorderColor: "rgba(220, 220, 220,1)",
           pointHoverBorderWidth: 2,
-          pointRadius: 1,
-          pointHitRadius: 10,
-          data: getValue(daily_points),
+          pointRadius: 4,
+          pointHitRadius: 1,
+          data: getValue(dataset)[categories[i]],
         },
       ],
     };
+    }
+   
+    
+    console.log(chartDataset)
+    console.log(getValue(dataset))
   }
 </script>
 
@@ -207,6 +233,7 @@
         on:click={() => {
           activeTab = tab;
           console.log(tab);
+          updateChart();
         }}
       >
         {tab.label}
@@ -226,11 +253,41 @@
           class="h-10 bg-slate-100 p-2 focus:outline-none"
         />
       </div>
-      <div class="w-full p-4 flex justify-center">
-        <div class="p-10 border border-solid  w-3/4 border-blue-500 rounded-lg">
+      <div class="w-full p-4 justify-center gap-5 grid grid-cols-2">
+        <div class="p-10 border border-solid  w-full border-blue-500 rounded-lg">
+          <h2 class="font-bold text-xl text-red-700">Voters</h2>
+          {#if chartDataset["voter"] != undefined}
+            <Line class="ml-40 mr-10" data={chartDataset["voter"]} />
+          {/if}
+        </div>
+        <div class="p-10 border border-solid  w-full border-blue-500 rounded-lg">
+          <h2 class="font-bold text-xl text-red-700">Barangay ID</h2>
+          {#if chartDataset["id"] != undefined}
+            <Line class="ml-40 mr-10" data={chartDataset["id"]} />
+          {/if}
+        </div>
+        <div class="p-10 border border-solid  w-full border-blue-500 rounded-lg">
           <h2 class="font-bold text-xl text-red-700">Certificate</h2>
-          {#if $daily_points.length > 1}
-            <Line class="ml-40 mr-10" data={chartData} />
+          {#if chartDataset["certificate"] != undefined}
+            <Line class="ml-40 mr-10" data={chartDataset["certificate"]} />
+          {/if}
+        </div>
+        <div class="p-10 border border-solid  w-full border-blue-500 rounded-lg">
+          <h2 class="font-bold text-xl text-red-700">Clearance</h2>
+          {#if chartDataset["clearance"] != undefined}
+            <Line class="ml-40 mr-10" data={chartDataset["clearance"]} />
+          {/if}
+        </div>
+        <div class="p-10 border border-solid  w-full border-blue-500 rounded-lg">
+          <h2 class="font-bold text-xl text-red-700">Indigency</h2>
+          {#if chartDataset["indigency"] != undefined}
+            <Line class="ml-40 mr-10" data={chartDataset["indigency"]} />
+          {/if}
+        </div>
+        <div class="p-10 border border-solid  w-full border-blue-500 rounded-lg">
+          <h2 class="font-bold text-xl text-red-700">Complaint</h2>
+          {#if chartDataset["complaint"] != undefined}
+            <Line class="ml-40 mr-10" data={chartDataset["complaint"]} />
           {/if}
         </div>
       </div>
@@ -241,17 +298,97 @@
         <input
           type="month"
           bind:value={selectedDate}
+          on:change={handleDateChange}
           class="h-10 bg-slate-100 p-2 focus:outline-none"
         />
       </div>
-      <div class="w-full p-4">
-        <div class="p-10 border border-solid border-blue-500 rounded-lg">
-          
+      <div class="w-full p-4 justify-center gap-5 grid grid-cols-2">
+        <div class="p-10 border border-solid  w-full border-blue-500 rounded-lg">
+          <h2 class="font-bold text-xl text-red-700">Voters</h2>
+          {#if chartDataset["voter"] != undefined}
+            <Line class="ml-40 mr-10" data={chartDataset["voter"]} />
+          {/if}
+        </div>
+        <div class="p-10 border border-solid  w-full border-blue-500 rounded-lg">
+          <h2 class="font-bold text-xl text-red-700">Barangay ID</h2>
+          {#if chartDataset["id"] != undefined}
+            <Line class="ml-40 mr-10" data={chartDataset["id"]} />
+          {/if}
+        </div>
+        <div class="p-10 border border-solid  w-full border-blue-500 rounded-lg">
+          <h2 class="font-bold text-xl text-red-700">Certificate</h2>
+          {#if chartDataset["certificate"] != undefined}
+            <Line class="ml-40 mr-10" data={chartDataset["certificate"]} />
+          {/if}
+        </div>
+        <div class="p-10 border border-solid  w-full border-blue-500 rounded-lg">
+          <h2 class="font-bold text-xl text-red-700">Clearance</h2>
+          {#if chartDataset["clearance"] != undefined}
+            <Line class="ml-40 mr-10" data={chartDataset["clearance"]} />
+          {/if}
+        </div>
+        <div class="p-10 border border-solid  w-full border-blue-500 rounded-lg">
+          <h2 class="font-bold text-xl text-red-700">Indigency</h2>
+          {#if chartDataset["indigency"] != undefined}
+            <Line class="ml-40 mr-10" data={chartDataset["indigency"]} />
+          {/if}
+        </div>
+        <div class="p-10 border border-solid  w-full border-blue-500 rounded-lg">
+          <h2 class="font-bold text-xl text-red-700">Complaint</h2>
+          {#if chartDataset["complaint"] != undefined}
+            <Line class="ml-40 mr-10" data={chartDataset["complaint"]} />
+          {/if}
         </div>
       </div>
     {/if}
     {#if activeTab.id === 3}
-      <div>Yearly</div>
+    <div class="flex justify-center items-center">
+      <p>Date: </p>
+      <input
+        type="number" id="year" name="year" min="2023" max="2036" placeholder="YYYY"
+        bind:value={selectedDate}
+        on:change={handleDateChange}
+        class="h-10 bg-slate-100 p-2 focus:outline-none"
+      />
+    </div>
+    <div class="w-full p-4 justify-center gap-5 grid grid-cols-2">
+      <div class="p-10 border border-solid  w-full border-blue-500 rounded-lg">
+        <h2 class="font-bold text-xl text-red-700">Voters</h2>
+        {#if chartDataset["voter"] != undefined}
+          <Line class="ml-40 mr-10" data={chartDataset["voter"]} />
+        {/if}
+      </div>
+      <div class="p-10 border border-solid  w-full border-blue-500 rounded-lg">
+        <h2 class="font-bold text-xl text-red-700">Barangay ID</h2>
+        {#if chartDataset["id"] != undefined}
+          <Line class="ml-40 mr-10" data={chartDataset["id"]} />
+        {/if}
+      </div>
+      <div class="p-10 border border-solid  w-full border-blue-500 rounded-lg">
+        <h2 class="font-bold text-xl text-red-700">Certificate</h2>
+        {#if chartDataset["certificate"] != undefined}
+          <Line class="ml-40 mr-10" data={chartDataset["certificate"]} />
+        {/if}
+      </div>
+      <div class="p-10 border border-solid  w-full border-blue-500 rounded-lg">
+        <h2 class="font-bold text-xl text-red-700">Clearance</h2>
+        {#if chartDataset["clearance"] != undefined}
+          <Line class="ml-40 mr-10" data={chartDataset["clearance"]} />
+        {/if}
+      </div>
+      <div class="p-10 border border-solid  w-full border-blue-500 rounded-lg">
+        <h2 class="font-bold text-xl text-red-700">Indigency</h2>
+        {#if chartDataset["indigency"] != undefined}
+          <Line class="ml-40 mr-10" data={chartDataset["indigency"]} />
+        {/if}
+      </div>
+      <div class="p-10 border border-solid  w-full border-blue-500 rounded-lg">
+        <h2 class="font-bold text-xl text-red-700">Complaint</h2>
+        {#if chartDataset["complaint"] != undefined}
+          <Line class="ml-40 mr-10" data={chartDataset["complaint"]} />
+        {/if}
+      </div>
+    </div>
     {/if}
   </div>
 </div>
