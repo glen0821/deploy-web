@@ -105,7 +105,6 @@
       listOfVotersStore.suffixName.BINDTHIS = voter.suffixName;
       listOfVotersStore.precintNum.BINDTHIS = voter.precintNumber;
       listOfVotersStore.completeAddress.BINDTHIS = voter.completeAddress;
-
     }, 100);
   };
 
@@ -175,6 +174,31 @@
   //print data to external platforms like pdf etc
   const printFunc = () => {
     print();
+  };
+
+  const updateStatus = async (docID, selectedStatus, ownerID) => {
+    const docRef = doc(colRef, docID);
+
+    const updatedData = {
+      verified: selectedStatus,
+      lastUpdated: serverTimestamp(),
+    };
+
+    await setDoc(docRef, updatedData, { merge: true });
+
+    const notifDocRef = doc(collection(db, "notifications"));
+    let message;
+    if (selectedStatus == "verified") {
+      message = "Your account has been verified";
+      var currentDate = Date.now();
+      const notificationData = {
+        message: message,
+        userID: ownerID,
+        timestamp: currentDate,
+      };
+      console.log(notificationData);
+      await setDoc(notifDocRef, notificationData);
+    }
   };
 </script>
 
@@ -340,7 +364,17 @@
                 <td class="px-6 py-4">{voter.precintNumber} </td>
                 <td class="px-6 py-4"> {voter.completeAddress} </td>
                 {#if !$showPrintModel}
-                  <td>
+                  <td class="flex">
+                    <select
+                      class="bg-white"
+                      bind:value={voter.verified}
+                      on:change={() => {
+                        updateStatus(voter.id, voter.verified, voter.id)
+                      }}
+                    >
+                      <option value="to_verify">For verification</option>
+                      <option value="verified">Verified</option>
+                    </select>
                     <div class="flex space-x-5">
                       <button
                         class="hover:bg-orange-300 duration-700 px-4 p-2 rounded-full hover:text-black hover:font-bold hover:scale-105"
@@ -386,7 +420,7 @@
               bind:this={listOfVotersStore.middleInitial}
             />
           </div>
-          
+
           <div class="">
             <Inputs
               TITLE="Last Name"
