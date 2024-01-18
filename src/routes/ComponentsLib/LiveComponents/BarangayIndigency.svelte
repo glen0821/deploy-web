@@ -262,6 +262,34 @@
 
     return true;
   }
+
+  const headerSortAscending = {
+    firstName: false,
+  };
+
+  const sortTable = (fieldName, isAscending) => {
+    let q = query(colRef, orderBy(fieldName, isAscending ? "asc" : "desc"));
+    onSnapshot(q, (snapshots) => {
+      let fbData = [];
+      snapshots.docs.forEach((doc) => {
+        let data = { ...doc.data(), id: doc.id };
+        fbData = [data, ...fbData];
+      });
+      onSnapsIndigency.set(fbData);
+      console.log(fbData);
+      bgyClearance.trigger = false;
+    });
+  };
+
+  const resetSort = (key, value) => {
+    let keys = Object.keys(headerSortAscending);
+    for (let i = 0; i < keys.length; i++) {
+      headerSortAscending[keys[i]] = undefined;
+    }
+    headerSortAscending[key] = value;
+  };
+
+  sortTable("firstName", false);
 </script>
 
 <div
@@ -443,15 +471,240 @@
         <table class="w-full text-sm text-left text-gray-500">
           <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
-              <th scope="col" class="px-6 py-3"> firstname </th>
-              <th scope="col" class="px-6 py-3"> MI </th>
-              <th scope="col" class="px-6 py-3"> lastname </th>
-              <th scope="col" class="px-6 py-3"> suffix </th>
-              <th scope="col" class="px-6 py-3"> address </th>
-              <th scope="col" class="px-6 py-3"> age </th>
-              <th scope="col" class="px-6 py-3"> length of stay </th>
-              <th scope="col" class="px-6 py-3"> purpose </th>
-              <th scope="col" class="px-6 py-3"> date of appointment </th>
+              <th
+                scope="col"
+                class="px-6 py-3"
+                on:click={() => {
+                  if (headerSortAscending.firstName == undefined) {
+                    headerSortAscending.firstName = true;
+                  } else {
+                    headerSortAscending.firstName =
+                      !headerSortAscending.firstName;
+                  }
+                  resetSort("firstName", headerSortAscending.firstName);
+                  sortTable("firstName", headerSortAscending.firstName);
+                }}
+              >
+                <div class="flex justify-center gap-2 items-center">
+                  firstname
+                  <span
+                    class={`sort-indicator 
+                ${
+                  headerSortAscending.firstName == undefined
+                    ? ""
+                    : headerSortAscending.firstName
+                      ? "asc"
+                      : "desc"
+                }
+                `}
+                  ></span>
+                </div>
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3"
+                on:click={() => {
+                  if (headerSortAscending.middleInitial == undefined) {
+                    headerSortAscending.middleInitial = true;
+                  } else {
+                    headerSortAscending.middleInitial =
+                      !headerSortAscending.middleInitial;
+                  }
+                  resetSort("middleInitial", headerSortAscending.middleInitial);
+                  sortTable("middleInitial", headerSortAscending.middleInitial);
+                }}
+              >
+                <div class="flex justify-center gap-2 items-center">
+                  MI
+                  <span
+                    class={`sort-indicator 
+                ${
+                  headerSortAscending.middleInitial == undefined
+                    ? ""
+                    : headerSortAscending.middleInitial
+                      ? "asc"
+                      : "desc"
+                }
+                `}
+                  ></span>
+                </div>
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3"
+                on:click={() => {
+                  if (headerSortAscending.lastName == undefined) {
+                    headerSortAscending.lastName = true;
+                  } else {
+                    headerSortAscending.lastName =
+                      !headerSortAscending.lastName;
+                  }
+                  resetSort("lastName", headerSortAscending.lastName);
+                  sortTable("lastName", headerSortAscending.lastName);
+                }}
+              >
+                <div class="flex justify-center gap-2 items-center">
+                  lastName
+                  <span
+                    class={`sort-indicator 
+                ${
+                  headerSortAscending.lastName == undefined
+                    ? ""
+                    : headerSortAscending.lastName
+                      ? "asc"
+                      : "desc"
+                }
+                `}
+                  ></span>
+                </div>
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3"
+                on:click={() => {
+                  if (headerSortAscending.suffixName == undefined) {
+                    headerSortAscending.suffixName = true;
+                  } else {
+                    headerSortAscending.suffixName =
+                      !headerSortAscending.suffixName;
+                  }
+                  resetSort("suffixName", headerSortAscending.suffixName);
+                  sortTable("suffixName", headerSortAscending.suffixName);
+                }}
+              >
+                <div class="flex justify-center gap-2 items-center">
+                  Suffix
+                  <span
+                    class={`sort-indicator 
+                ${
+                  headerSortAscending.suffixName == undefined
+                    ? ""
+                    : headerSortAscending.suffixName
+                      ? "asc"
+                      : "desc"
+                }
+                `}
+                  ></span>
+                </div>
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3"
+                on:click={() => {
+                  if (headerSortAscending.completeAddress == undefined) {
+                    headerSortAscending.completeAddress = true;
+                  } else {
+                    headerSortAscending.completeAddress =
+                      !headerSortAscending.completeAddress;
+                  }
+                  resetSort("completeAddress", headerSortAscending.completeAddress);
+                  sortTable("address", headerSortAscending.completeAddress);
+                }}
+              >
+                <div class="flex justify-center gap-2 items-center">
+                  Address
+                  <span
+                    class={`sort-indicator 
+                ${
+                  headerSortAscending.completeAddress == undefined
+                    ? ""
+                    : headerSortAscending.completeAddress
+                      ? "asc"
+                      : "desc"
+                }
+                `}
+                  ></span>
+                </div>
+              </th>
+              <th
+              scope="col"
+              class="px-6 py-3"
+              on:click={() => {
+                if (headerSortAscending.age == undefined) {
+                  headerSortAscending.age = true;
+                } else {
+                  headerSortAscending.age =
+                    !headerSortAscending.age;
+                }
+                resetSort("age", headerSortAscending.age);
+                sortTable("age", headerSortAscending.age);
+              }}
+            >
+              <div class="flex justify-center gap-2 items-center">
+                age
+                <span
+                  class={`sort-indicator 
+              ${
+                headerSortAscending.age == undefined
+                  ? ""
+                  : headerSortAscending.age
+                    ? "asc"
+                    : "desc"
+              }
+              `}
+                ></span>
+              </div>
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-3"
+              on:click={() => {
+                if (headerSortAscending.lengthOfStay == undefined) {
+                  headerSortAscending.lengthOfStay = true;
+                } else {
+                  headerSortAscending.lengthOfStay =
+                    !headerSortAscending.lengthOfStay;
+                }
+                resetSort("lengthOfStay", headerSortAscending.lengthOfStay);
+                sortTable("lengthOfStay", headerSortAscending.lengthOfStay);
+              }}
+            >
+              <div class="flex justify-center gap-2 items-center">
+                length Of Stay
+                <span
+                  class={`sort-indicator 
+              ${
+                headerSortAscending.lengthOfStay == undefined
+                  ? ""
+                  : headerSortAscending.lengthOfStay
+                    ? "asc"
+                    : "desc"
+              }
+              `}
+                ></span>
+              </div>
+            </th>
+            
+            <th scope="col" class="px-6 py-3"> purpose </th>
+            <th
+              scope="col"
+              class="px-6 py-3"
+              on:click={() => {
+                if (headerSortAscending.dateOfAppointment == undefined) {
+                  headerSortAscending.dateOfAppointment = true;
+                } else {
+                  headerSortAscending.dateOfAppointment =
+                    !headerSortAscending.dateOfAppointment;
+                }
+                resetSort("dateOfAppointment", headerSortAscending.dateOfAppointment);
+                sortTable("dateOfAppointment", headerSortAscending.dateOfAppointment);
+              }}
+            >
+              <div class="flex justify-center gap-2 items-center">
+                date Of Appointment
+                <span
+                  class={`sort-indicator 
+              ${
+                headerSortAscending.dateOfAppointment == undefined
+                  ? ""
+                  : headerSortAscending.dateOfAppointment
+                    ? "asc"
+                    : "desc"
+              }
+              `}
+                ></span>
+              </div>
+            </th>
               <th scope="col" class="px-6 py-3"> status </th>
               {#if !$showPrintModel}
                 <th scope="col" class="px-6 py-3"> action </th>
@@ -722,3 +975,26 @@
     </div>
   </div>
 </div>
+<style>
+  /* Add some styling for the sorting indicator */
+  .sort-indicator {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    vertical-align: middle;
+    transition: transform 0.3s ease-out;
+  }
+
+  .asc {
+    border-width: 8px 5px 0 5px;
+    border-color: #000 transparent transparent transparent;
+    transform: rotate(180deg);
+  }
+
+  .desc {
+    border-width: 8px 5px 0 5px;
+    border-color: #000 transparent transparent transparent;
+    transform: rotate(0deg);
+  }
+</style>

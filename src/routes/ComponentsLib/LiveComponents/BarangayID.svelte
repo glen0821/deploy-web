@@ -81,7 +81,7 @@
       fbData = [data, ...fbData];
     });
     onSnapsBgyID.set(fbData);
-    console.log(fbData)
+    console.log(fbData);
   });
 
   //removeData from database
@@ -124,18 +124,18 @@
   const updateData = async (data) => {
     const docRef = doc(colRef, data);
     console.log({
-        lastUpdated: serverTimestamp(),
-        firstName: bgyVarStore.firstName.BINDTHIS,
-        middleInitial: bgyVarStore.middleInitial.BINDTHIS,
-        lastName: bgyVarStore.lastName.BINDTHIS,
-        suffixName: bgyVarStore.suffixName.BINDTHIS,
-        address: bgyVarStore.address.BINDTHIS,
-        birthdate: bgyVarStore.birthdate.BINDTHIS,
-        gender: bgyVarStore.gender.BINDTHIS,
-        height: bgyVarStore.height.BINDTHIS,
-        weight: bgyVarStore.weight.BINDTHIS,
-        dateOfAppointment: bgyVarStore.dateOfAppointment.BINDTHIS,
-      },)
+      lastUpdated: serverTimestamp(),
+      firstName: bgyVarStore.firstName.BINDTHIS,
+      middleInitial: bgyVarStore.middleInitial.BINDTHIS,
+      lastName: bgyVarStore.lastName.BINDTHIS,
+      suffixName: bgyVarStore.suffixName.BINDTHIS,
+      address: bgyVarStore.address.BINDTHIS,
+      birthdate: bgyVarStore.birthdate.BINDTHIS,
+      gender: bgyVarStore.gender.BINDTHIS,
+      height: bgyVarStore.height.BINDTHIS,
+      weight: bgyVarStore.weight.BINDTHIS,
+      dateOfAppointment: bgyVarStore.dateOfAppointment.BINDTHIS,
+    });
     setDoc(
       docRef,
       {
@@ -182,9 +182,10 @@
       bgyVarStore.address.BINDTHIS = data.completeAddress;
       bgyVarStore.height.BINDTHIS = data.height;
       bgyVarStore.weight.BINDTHIS = data.weight;
-      bgyVarStore.dateOfAppointment.BINDTHIS = fixDateFormat(data.dateOfAppointment);
+      bgyVarStore.dateOfAppointment.BINDTHIS = fixDateFormat(
+        data.dateOfAppointment
+      );
       bgyVarStore.birthdate.BINDTHIS = fixDateFormat(data.birthdate);
-
     }, 100);
   };
 
@@ -246,6 +247,41 @@
     console.log(printContent);
     return true;
   }
+  const headerSortAscending = {
+    firstName: false,
+    middleInitial: undefined,
+    lastName: undefined,
+    suffixName: undefined,
+    precintNum: undefined,
+    completeAddress: undefined,
+    kwiri: undefined,
+    trigger: undefined,
+  };
+
+  const sortTable = (fieldName, isAscending) => {
+    let q = query(colRef, orderBy(fieldName, isAscending ? "asc" : "desc"));
+    onSnapshot(q, (snapshots) => {
+      let fbData = [];
+      snapshots.docs.forEach((doc) => {
+        let data = { ...doc.data(), id: doc.id };
+        fbData = [data, ...fbData];
+      });
+      onSnaps.set(fbData);
+      console.log(fbData);
+
+      listOfVotersStore.trigger = false;
+    });
+  };
+
+  const resetSort = (key, value) => {
+    let keys = Object.keys(headerSortAscending);
+    for (let i = 0; i < keys.length; i++) {
+      headerSortAscending[keys[i]] = undefined;
+    }
+    headerSortAscending[key] = value;
+  };
+
+  sortTable("firstName", false);
 </script>
 
 <div
@@ -411,16 +447,184 @@
               {#if !$showPrintModel}
                 <th scope="col" class="px-6 py-3"> ID Image </th>
               {/if}
-              <th scope="col" class="px-6 py-3"> Firstname </th>
-              <th scope="col" class="px-6 py-3"> MI</th>
-              <th scope="col" class="px-6 py-3"> Lastname </th>
-              <th scope="col" class="px-6 py-3"> Suffix </th>
-              <th scope="col" class="px-6 py-3"> address </th>
+              <th
+                scope="col"
+                class="px-6 py-3"
+                on:click={() => {
+                  if (headerSortAscending.firstName == undefined) {
+                    headerSortAscending.firstName = true;
+                  } else {
+                    headerSortAscending.firstName =
+                      !headerSortAscending.firstName;
+                  }
+                  resetSort("firstName", headerSortAscending.firstName);
+                  sortTable("firstName", headerSortAscending.firstName);
+                }}
+              >
+                <div class="flex justify-center gap-2 items-center">
+                  firstname
+                  <span
+                    class={`sort-indicator 
+                ${
+                  headerSortAscending.firstName == undefined
+                    ? ""
+                    : headerSortAscending.firstName
+                      ? "asc"
+                      : "desc"
+                }
+                `}
+                  ></span>
+                </div>
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3"
+                on:click={() => {
+                  if (headerSortAscending.middleInitial == undefined) {
+                    headerSortAscending.middleInitial = true;
+                  } else {
+                    headerSortAscending.middleInitial =
+                      !headerSortAscending.middleInitial;
+                  }
+                  resetSort("middleInitial", headerSortAscending.middleInitial);
+                  sortTable("middleInitial", headerSortAscending.middleInitial);
+                }}
+              >
+                <div class="flex justify-center gap-2 items-center">
+                  MI
+                  <span
+                    class={`sort-indicator 
+                ${
+                  headerSortAscending.middleInitial == undefined
+                    ? ""
+                    : headerSortAscending.middleInitial
+                      ? "asc"
+                      : "desc"
+                }
+                `}
+                  ></span>
+                </div>
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3"
+                on:click={() => {
+                  if (headerSortAscending.lastName == undefined) {
+                    headerSortAscending.lastName = true;
+                  } else {
+                    headerSortAscending.lastName =
+                      !headerSortAscending.lastName;
+                  }
+                  resetSort("lastName", headerSortAscending.lastName);
+                  sortTable("lastName", headerSortAscending.lastName);
+                }}
+              >
+                <div class="flex justify-center gap-2 items-center">
+                  lastName
+                  <span
+                    class={`sort-indicator 
+                ${
+                  headerSortAscending.lastName == undefined
+                    ? ""
+                    : headerSortAscending.lastName
+                      ? "asc"
+                      : "desc"
+                }
+                `}
+                  ></span>
+                </div>
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3"
+                on:click={() => {
+                  if (headerSortAscending.suffixName == undefined) {
+                    headerSortAscending.suffixName = true;
+                  } else {
+                    headerSortAscending.suffixName =
+                      !headerSortAscending.suffixName;
+                  }
+                  resetSort("suffixName", headerSortAscending.suffixName);
+                  sortTable("suffixName", headerSortAscending.suffixName);
+                }}
+              >
+                <div class="flex justify-center gap-2 items-center">
+                  Suffix
+                  <span
+                    class={`sort-indicator 
+                ${
+                  headerSortAscending.suffixName == undefined
+                    ? ""
+                    : headerSortAscending.suffixName
+                      ? "asc"
+                      : "desc"
+                }
+                `}
+                  ></span>
+                </div>
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3"
+                on:click={() => {
+                  if (headerSortAscending.completeAddress == undefined) {
+                    headerSortAscending.completeAddress = true;
+                  } else {
+                    headerSortAscending.completeAddress =
+                      !headerSortAscending.completeAddress;
+                  }
+                  resetSort("completeAddress", headerSortAscending.completeAddress);
+                  sortTable("completeAddress", headerSortAscending.completeAddress);
+                }}
+              >
+                <div class="flex justify-center gap-2 items-center">
+                  Address
+                  <span
+                    class={`sort-indicator 
+                ${
+                  headerSortAscending.completeAddress == undefined
+                    ? ""
+                    : headerSortAscending.completeAddress
+                      ? "asc"
+                      : "desc"
+                }
+                `}
+                  ></span>
+                </div>
+              </th>
               <th scope="col" class="px-6 py-3"> birthdate </th>
               <th scope="col" class="px-6 py-3"> gender </th>
               <th scope="col" class="px-6 py-3"> height </th>
               <th scope="col" class="px-6 py-3"> weight </th>
-              <th scope="col" class="px-6 py-3"> Appointment </th>
+              <th
+              scope="col"
+              class="px-6 py-3"
+              on:click={() => {
+                if (headerSortAscending.dateOfAppointment == undefined) {
+                  headerSortAscending.dateOfAppointment = true;
+                } else {
+                  headerSortAscending.dateOfAppointment =
+                    !headerSortAscending.dateOfAppointment;
+                }
+                resetSort("dateOfAppointment", headerSortAscending.dateOfAppointment);
+                sortTable("dateOfAppointment", headerSortAscending.dateOfAppointment);
+              }}
+            >
+              <div class="flex justify-center gap-2 items-center">
+                Appointment
+                <span
+                  class={`sort-indicator 
+              ${
+                headerSortAscending.dateOfAppointment == undefined
+                  ? ""
+                  : headerSortAscending.dateOfAppointment
+                    ? "asc"
+                    : "desc"
+              }
+              `}
+                ></span>
+              </div>
+            </th>
               <th scope="col" class="px-6 py-3"> status </th>
               {#if !$showPrintModel}
                 <th scope="col" class="px-6 py-3"> action </th>
@@ -458,9 +662,7 @@
                   {barangayId.address}
                 </td>
                 <td class="px-6 py-4">
-                  {
-                    barangayId['birthdate']
-                  }
+                  {barangayId["birthdate"]}
                 </td>
                 <td class="px-6 py-4">
                   {barangayId.gender}
@@ -485,7 +687,11 @@
                       class="bg-white"
                       bind:value={barangayId.status}
                       on:change={() =>
-                        updateStatus(barangayId.id, barangayId.status, barangayId.appointmentOwner)}
+                        updateStatus(
+                          barangayId.id,
+                          barangayId.status,
+                          barangayId.appointmentOwner
+                        )}
                     >
                       <option value="Processing">On Process</option>
                       <option value="Ready for pickup">For Pickup</option>
@@ -627,3 +833,27 @@
     </div>
   </div>
 </div>
+
+<style>
+  /* Add some styling for the sorting indicator */
+  .sort-indicator {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    vertical-align: middle;
+    transition: transform 0.3s ease-out;
+  }
+
+  .asc {
+    border-width: 8px 5px 0 5px;
+    border-color: #000 transparent transparent transparent;
+    transform: rotate(180deg);
+  }
+
+  .desc {
+    border-width: 8px 5px 0 5px;
+    border-color: #000 transparent transparent transparent;
+    transform: rotate(0deg);
+  }
+</style>
