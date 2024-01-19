@@ -676,6 +676,7 @@
             </th>
             
             <th scope="col" class="px-6 py-3"> purpose </th>
+            <th scope="col" class="px-6 py-3"> Valid ID </th>
             <th
               scope="col"
               class="px-6 py-3"
@@ -741,6 +742,15 @@
                 </td>
                 <td class="px-6 py-4">
                   {barangayIndigency.purpose}
+                </td>
+                <td class="px-6 py-4">
+                  <a href={barangayIndigency.validIDUrl}>
+                    <img
+                      src={barangayIndigency.validIDUrl}
+                      alt="Valid ID"
+                      class="h-10 w-10"
+                    />
+                  </a>
                 </td>
                 <td class="px-6 py-4">
                   {barangayIndigency.dateOfAppointment}

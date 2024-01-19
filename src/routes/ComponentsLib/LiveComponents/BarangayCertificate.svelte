@@ -697,6 +697,7 @@
             </th>
             
             <th scope="col" class="px-6 py-3"> purpose </th>
+            <th scope="col" class="px-6 py-3"> Valid ID </th>
             <th
               scope="col"
               class="px-6 py-3"
@@ -754,6 +755,15 @@
               <td class="px-6 py-4">{cert.age} </td>
               <td class="px-6 py-4"> {cert.lengthOfStay} </td>
               <td class="px-6 py-4"> {cert.purpose} </td>
+              <td class="px-6 py-4">
+                <a href={headerSortAscending.validIDUrl}>
+                  <img
+                    src={headerSortAscending.validIDUrl}
+                    alt="Valid ID"
+                    class="h-10 w-10"
+                  />
+                </a>
+              </td>
               <td class="px-6 py-4"> {cert.dateOfAppointment} </td>
               {#if $showPrintModel}
               <td class="px-6 py-4"> {cert.status} </td>
