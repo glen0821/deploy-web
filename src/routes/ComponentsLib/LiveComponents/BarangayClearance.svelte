@@ -154,7 +154,7 @@
       },
       { merge: true }
     );
-    compareClearanceValue.set(-1)
+    compareClearanceValue.set(-1);
   };
 
   //showModalComparison
@@ -168,7 +168,9 @@
       bgyVarStore.address.BINDTHIS = data.address;
       bgyVarStore.lengthOfStay.BINDTHIS = data.lengthOfStay;
       bgyVarStore.purpose.BINDTHIS = data.purpose;
-      bgyVarStore.dateOfAppointment.BINDTHIS = fixDateFormat(data.dateOfAppointment);
+      bgyVarStore.dateOfAppointment.BINDTHIS = fixDateFormat(
+        data.dateOfAppointment
+      );
     }, 100);
   };
 
@@ -287,6 +289,23 @@
   };
 
   sortTable("firstName", false);
+
+  const updateCivil = async (userID, selectedStatus) => {
+    const docRef = doc(colRef, userID);
+    const updatedData = {
+      civilStatus: selectedStatus,
+      lastUpdated: serverTimestamp(),
+    };
+    await setDoc(docRef, updatedData, { merge: true });
+  };
+  const updateGender = async (userID, selectedStatus) => {
+    const docRef = doc(colRef, userID);
+    const updatedData = {
+      gender: selectedStatus,
+      lastUpdated: serverTimestamp(),
+    };
+    await setDoc(docRef, updatedData, { merge: true });
+  };
 </script>
 
 <div
@@ -594,7 +613,10 @@
                     headerSortAscending.completeAddress =
                       !headerSortAscending.completeAddress;
                   }
-                  resetSort("completeAddress", headerSortAscending.completeAddress);
+                  resetSort(
+                    "completeAddress",
+                    headerSortAscending.completeAddress
+                  );
                   sortTable("address", headerSortAscending.completeAddress);
                 }}
               >
@@ -614,23 +636,22 @@
                 </div>
               </th>
               <th
-              scope="col"
-              class="px-6 py-3"
-              on:click={() => {
-                if (headerSortAscending.age == undefined) {
-                  headerSortAscending.age = true;
-                } else {
-                  headerSortAscending.age =
-                    !headerSortAscending.age;
-                }
-                resetSort("age", headerSortAscending.age);
-                sortTable("age", headerSortAscending.age);
-              }}
-            >
-              <div class="flex justify-center gap-2 items-center">
-                age
-                <span
-                  class={`sort-indicator 
+                scope="col"
+                class="px-6 py-3"
+                on:click={() => {
+                  if (headerSortAscending.age == undefined) {
+                    headerSortAscending.age = true;
+                  } else {
+                    headerSortAscending.age = !headerSortAscending.age;
+                  }
+                  resetSort("age", headerSortAscending.age);
+                  sortTable("age", headerSortAscending.age);
+                }}
+              >
+                <div class="flex justify-center gap-2 items-center">
+                  age
+                  <span
+                    class={`sort-indicator 
               ${
                 headerSortAscending.age == undefined
                   ? ""
@@ -639,27 +660,27 @@
                     : "desc"
               }
               `}
-                ></span>
-              </div>
-            </th>
-            <th
-              scope="col"
-              class="px-6 py-3"
-              on:click={() => {
-                if (headerSortAscending.lengthOfStay == undefined) {
-                  headerSortAscending.lengthOfStay = true;
-                } else {
-                  headerSortAscending.lengthOfStay =
-                    !headerSortAscending.lengthOfStay;
-                }
-                resetSort("lengthOfStay", headerSortAscending.lengthOfStay);
-                sortTable("lengthOfStay", headerSortAscending.lengthOfStay);
-              }}
-            >
-              <div class="flex justify-center gap-2 items-center">
-                length Of Stay
-                <span
-                  class={`sort-indicator 
+                  ></span>
+                </div>
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3"
+                on:click={() => {
+                  if (headerSortAscending.lengthOfStay == undefined) {
+                    headerSortAscending.lengthOfStay = true;
+                  } else {
+                    headerSortAscending.lengthOfStay =
+                      !headerSortAscending.lengthOfStay;
+                  }
+                  resetSort("lengthOfStay", headerSortAscending.lengthOfStay);
+                  sortTable("lengthOfStay", headerSortAscending.lengthOfStay);
+                }}
+              >
+                <div class="flex justify-center gap-2 items-center">
+                  length Of Stay
+                  <span
+                    class={`sort-indicator 
               ${
                 headerSortAscending.lengthOfStay == undefined
                   ? ""
@@ -668,30 +689,36 @@
                     : "desc"
               }
               `}
-                ></span>
-              </div>
-            </th>
-            
-            <th scope="col" class="px-6 py-3"> purpose </th>
-            <th scope="col" class="px-6 py-3"> Valid ID </th>
-            <th
-              scope="col"
-              class="px-6 py-3"
-              on:click={() => {
-                if (headerSortAscending.dateOfAppointment == undefined) {
-                  headerSortAscending.dateOfAppointment = true;
-                } else {
-                  headerSortAscending.dateOfAppointment =
-                    !headerSortAscending.dateOfAppointment;
-                }
-                resetSort("dateOfAppointment", headerSortAscending.dateOfAppointment);
-                sortTable("dateOfAppointment", headerSortAscending.dateOfAppointment);
-              }}
-            >
-              <div class="flex justify-center gap-2 items-center">
-                date Of Appointment
-                <span
-                  class={`sort-indicator 
+                  ></span>
+                </div>
+              </th>
+
+              <th scope="col" class="px-6 py-3"> purpose </th>
+              <th scope="col" class="px-6 py-3"> Valid ID </th>
+              <th
+                scope="col"
+                class="px-6 py-3"
+                on:click={() => {
+                  if (headerSortAscending.dateOfAppointment == undefined) {
+                    headerSortAscending.dateOfAppointment = true;
+                  } else {
+                    headerSortAscending.dateOfAppointment =
+                      !headerSortAscending.dateOfAppointment;
+                  }
+                  resetSort(
+                    "dateOfAppointment",
+                    headerSortAscending.dateOfAppointment
+                  );
+                  sortTable(
+                    "dateOfAppointment",
+                    headerSortAscending.dateOfAppointment
+                  );
+                }}
+              >
+                <div class="flex justify-center gap-2 items-center">
+                  date Of Appointment
+                  <span
+                    class={`sort-indicator 
               ${
                 headerSortAscending.dateOfAppointment == undefined
                   ? ""
@@ -700,9 +727,66 @@
                     : "desc"
               }
               `}
-                ></span>
-              </div>
-            </th>
+                  ></span>
+                </div>
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3"
+                on:click={() => {
+                  if (headerSortAscending.civilStatus == undefined) {
+                    headerSortAscending.civilStatus = true;
+                  } else {
+                    headerSortAscending.civilStatus =
+                      !headerSortAscending.civilStatus;
+                  }
+                  resetSort("civilStatus", headerSortAscending.civilStatus);
+                  sortTable("civilStatus", headerSortAscending.civilStatus);
+                }}
+              >
+                <div class="flex justify-center gap-2 items-center">
+                  civil Status
+                  <span
+                    class={`sort-indicator 
+                ${
+                  headerSortAscending.civilStatus == undefined
+                    ? ""
+                    : headerSortAscending.civilStatus
+                      ? "asc"
+                      : "desc"
+                }
+                `}
+                  ></span>
+                </div>
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-3"
+                on:click={() => {
+                  if (headerSortAscending.gender == undefined) {
+                    headerSortAscending.gender = true;
+                  } else {
+                    headerSortAscending.gender = !headerSortAscending.gender;
+                  }
+                  resetSort("gender", headerSortAscending.gender);
+                  sortTable("gender", headerSortAscending.gender);
+                }}
+              >
+                <div class="flex justify-center gap-2 items-center">
+                  gender
+                  <span
+                    class={`sort-indicator 
+                ${
+                  headerSortAscending.gender == undefined
+                    ? ""
+                    : headerSortAscending.gender
+                      ? "asc"
+                      : "desc"
+                }
+                `}
+                  ></span>
+                </div>
+              </th>
               <th scope="col" class="px-6 py-3"> status </th>
               {#if !$showPrintModel}
                 <th scope="col" class="px-6 py-3"> action </th>
@@ -752,6 +836,49 @@
                 <td class="px-6 py-4">
                   {barangayClearance.dateOfAppointment}
                 </td>
+                {#if $showPrintModel}
+                  <td class="px-6 py-4"> {barangayClearance.civilStatus} </td>
+                {/if}
+                {#if !$showPrintModel}
+                  <td class="px-6 py-4">
+                    <select
+                      class="bg-white"
+                      bind:value={barangayClearance.civilStatus}
+                      on:change={() =>
+                        updateCivil(
+                          barangayClearance.id,
+                          barangayClearance.civilStatus
+                        )}
+                    >
+                      <option value="Single">Single</option>
+                      <option value="Married">Married</option>
+                      <option value="Widowed">Widowed</option>
+                      <option value="Divorced">Divorced</option>
+                    </select>
+                  </td>
+                {/if}
+                {#if $showPrintModel}
+                  <td class="px-6 py-4"> {barangayClearance.gender} </td>
+                {/if}
+                {#if !$showPrintModel}
+                  <td class="px-6 py-4">
+                    <select
+                      class="bg-white"
+                      bind:value={barangayClearance.gender}
+                      on:change={() =>
+                        updateGender(
+                          barangayClearance.id,
+                          barangayClearance.gender
+                        )}
+                    >
+                      <option value="Single">Male</option>
+                      <option value="Married">Female</option>
+                    </select>
+                  </td>
+                {/if}
+                {#if $showPrintModel}
+                  <td class="px-6 py-4"> {barangayClearance.status} </td>
+                {/if}
                 {#if $showPrintModel}
                   <td class="px-6 py-4">
                     {barangayClearance.status}
@@ -972,6 +1099,7 @@
     </div>
   </div>
 </div>
+
 <style>
   /* Add some styling for the sorting indicator */
   .sort-indicator {

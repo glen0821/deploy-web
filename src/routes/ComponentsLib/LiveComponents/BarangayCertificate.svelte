@@ -11,7 +11,7 @@
     showCertAddModal,
     compareCertValue,
     showEditModalLogic,
-    printing
+    printing,
   } from "../BoundComponents/clickOutside";
 
   import { showPrintModel, formattedDate } from "./stateStore";
@@ -36,7 +36,6 @@
   // import PrintContent from "./PrintContent.svelte";
   import CertificateContent from "./CertificateContent.svelte";
   import reportHeader from "./images/header_report.png";
-
 
   // $: console.log(html2pdf);
 
@@ -78,7 +77,22 @@
     console.log(printContent);
     return true;
   }
-  
+
+  function fixDateFormat(originalDate) {
+    // Split the date string into year, month, and day
+    var parts = originalDate.split("-");
+
+    // Pad the month part with leading zero if it's a single digit
+    parts[1] = parts[1].length === 1 ? "0" + parts[1] : parts[1];
+
+    // Pad the day part with leading zero if it's a single digit
+    parts[2] = parts[2].length === 1 ? "0" + parts[2] : parts[2];
+
+    // Reconstruct the date string with the corrected format
+    var fixedDate = parts.join("-");
+
+    return fixedDate;
+  }
 
   //handler to show add modal
   const toShowAddModal = () => {
@@ -92,9 +106,12 @@
 
   //barangayID varStore
   const bgyVarStore = {
-    completeName: "",
+    firstName: "",
+    lastName: "",
+    middleInitial: "",
+    suffixName: "",
     address: "",
-    birthdate: "",
+    age: "",
     lengthOfStay: "",
     purpose: "",
     dateOfAppointment: "",
@@ -146,7 +163,7 @@
     };
 
     await setDoc(docRef, updatedData, { merge: true });
-    
+
     const notifDocRef = doc(collection(db, "notifications"));
     let message;
     if (selectedStatus == "Processing") {
@@ -166,35 +183,41 @@
     console.log(notificationData);
     await setDoc(notifDocRef, notificationData);
   };
-
-  //updateData from database
-  const updateData = async (data) => {
-    const docRef = doc(colRef, data);
-    setDoc(
-      docRef,
-      {
-        lastUpdated: serverTimestamp(),
-        completeName: bgyVarStore.completeName.BINDTHIS,
-        address: bgyVarStore.address.BINDTHIS,
-        birthdate: bgyVarStore.birthdate.BINDTHIS,
-        lengthOfStay: bgyVarStore.lengthOfStay.BINDTHIS,
-        purpose: bgyVarStore.purpose.BINDTHIS,
-        dateOfAppointment: bgyVarStore.dateOfAppointment.BINDTHIS,
-      },
-      { merge: true }
-    );
+  const updateCivil = async (userID, selectedStatus) => {
+    const docRef = doc(colRef, userID);
+    const updatedData = {
+      civilStatus: selectedStatus,
+      lastUpdated: serverTimestamp(),
+    };
+    await setDoc(docRef, updatedData, { merge: true });
+  };
+  const updateGender = async (userID, selectedStatus) => {
+    const docRef = doc(colRef, userID);
+    const updatedData = {
+      gender: selectedStatus,
+      lastUpdated: serverTimestamp(),
+    };
+    await setDoc(docRef, updatedData, { merge: true });
   };
 
   let editData = {};
 
   //showModalComparison
-  const editValueHandler = (data) => {
-    editData = { ...data };
-    // console.log(data);
+  const editValueHandler = (data, index) => {
     toShowEditModal();
-    // compareCertValue.set(data);
-
-    console.log(editData);
+    compareCertValue.set(index);
+    setTimeout(function () {
+      bgyVarStore.firstName.BINDTHIS = data.firstName;
+      bgyVarStore.middleInitial.BINDTHIS = data.middleInitial;
+      bgyVarStore.lastName.BINDTHIS = data.lastName;
+      bgyVarStore.suffixName.BINDTHIS = data.suffixName;
+      bgyVarStore.address.BINDTHIS = data.address;
+      bgyVarStore.lengthOfStay.BINDTHIS = data.lengthOfStay;
+      bgyVarStore.purpose.BINDTHIS = data.purpose;
+      bgyVarStore.dateOfAppointment.BINDTHIS = fixDateFormat(
+        data.dateOfAppointment
+      );
+    }, 100);
   };
 
   const handlerSearch = () => {
@@ -267,6 +290,26 @@
   };
 
   sortTable("firstName", false);
+
+  const updateData = async (data) => {
+    const docRef = doc(colRef, data);
+    await setDoc(
+      docRef,
+      {
+        lastUpdated: serverTimestamp(),
+        firstName: bgyVarStore.firstName.BINDTHIS,
+        middleInitial: bgyVarStore.middleInitial.BINDTHIS,
+        lastName: bgyVarStore.lastName.BINDTHIS,
+        suffixName: bgyVarStore.suffixName.BINDTHIS,
+        address: bgyVarStore.address.BINDTHIS,
+        lengthOfStay: bgyVarStore.lengthOfStay.BINDTHIS,
+        purpose: bgyVarStore.purpose.BINDTHIS,
+        dateOfAppointment: bgyVarStore.dateOfAppointment.BINDTHIS,
+      },
+      { merge: true }
+    );
+    $showCertEditLogic = false;
+  };
 </script>
 
 <PdfTemplate
@@ -276,7 +319,10 @@
   }
 />
 
-<div class="m-2 mx-auto text-xs" style="margin-bottom: {showPrintModel? "20vh" : "0px"}">
+<div
+  class="m-2 mx-auto text-xs"
+  style="margin-bottom: {showPrintModel ? '20vh' : '0px'}"
+>
   <div class="min-h-[50vh] p-10">
     <div class=" flex gap-2 items-center mb-2">
       <div class="w-full flex gap-2">
@@ -287,7 +333,9 @@
         <div class="">
           <button
             class="text-xs py-2 px-4 bg-orange-300 rounded-lg hover:bg-orange-400 hover:scale-105 duration-700 font-bold hover:text-white"
-            on:click={() => {$showPrintModel = true;}}
+            on:click={() => {
+              $showPrintModel = true;
+            }}
           >
             Print report
           </button>
@@ -309,38 +357,41 @@
       </div>
 
       {#if $showPrintModel}
-      <div class="fixed bottom-0 top-0 left-0 right-0 bg-white">
-        <div class="mx-auto max-w-[1000px] mt-[20vh] p-10">
-          <div class="fixed bottom-0 right-0 p-10"  style="bottom: -10px !important;">
-            <div class="flex gap-2">
-              {#if !$printing}
-                <div class="">
-                  <Button
-                    TITLE="Print"
-                    on:click={() => {
-                      $printing = true;
-                      // print();
-                      // $printing = false;
-                      setTimeout(() => print(), 100);
-                      setTimeout(() => {
-                        $printing = false;
-                        $showPrintModel = false;
-                      }, 2000);
-                    }}
-                  />
-                </div>
-                <div class="">
-                  <Button
-                    TITLE="Close"
-                    on:click={() => showPrintModel.set(false)}
-                  />
-                </div>
-              {/if}
+        <div class="fixed bottom-0 top-0 left-0 right-0 bg-white">
+          <div class="mx-auto max-w-[1000px] mt-[20vh] p-10">
+            <div
+              class="fixed bottom-0 right-0 p-10"
+              style="bottom: -10px !important;"
+            >
+              <div class="flex gap-2">
+                {#if !$printing}
+                  <div class="">
+                    <Button
+                      TITLE="Print"
+                      on:click={() => {
+                        $printing = true;
+                        // print();
+                        // $printing = false;
+                        setTimeout(() => print(), 100);
+                        setTimeout(() => {
+                          $printing = false;
+                          $showPrintModel = false;
+                        }, 2000);
+                      }}
+                    />
+                  </div>
+                  <div class="">
+                    <Button
+                      TITLE="Close"
+                      on:click={() => showPrintModel.set(false)}
+                    />
+                  </div>
+                {/if}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    {/if}
+      {/if}
     </div>
 
     {#if $showCertAddModal}
@@ -414,102 +465,35 @@
       </div>
     {/if}
 
-    {#if $showCertEditLogic}
-      <div
-        class="flex flex-col gap-2 bg-white p-4 max-w-fit mx-auto rounded-lg mt-2 absolute left-0 right-0 border-2 border-guiColor z-10"
-      >
-        <p class="text-xl text-center font-bold p-2 text-slate-500">
-          Update Barangay Certificate
-        </p>
-        <div class="">
-          <Inputs
-            TITLE="Complete Name:"
-            PLACEHOLDER={editData.completeName}
-            bind:this={bgyVarStore.completeName}
-          />
-        </div>
-
-        <div class="flex justify-center gap-2">
-          <div class="">
-            <Inputs
-              TITLE="Length of stay"
-              PLACEHOLDER={editData.lengthOfStay}
-              bind:this={bgyVarStore.lengthOfStay}
-            />
-          </div>
-          <div class="">
-            <Inputs
-              TITLE="Purpose"
-              PLACEHOLDER={editData.purpose}
-              bind:this={bgyVarStore.purpose}
-            />
-          </div>
-        </div>
-
-        <div class="flex justify-center gap-2">
-          <div class="w-full">
-            <Inputs
-              TITLE="Birthdate:"
-              TYPE="date"
-              bind:this={bgyVarStore.birthdate}
-            />
-          </div>
-        </div>
-
-        <div class="">
-          <Inputs
-            TITLE="Complete Address:"
-            PLACEHOLDER={editData.address}
-            bind:this={bgyVarStore.address}
-          />
-        </div>
-
-        <div class="">
-          <Inputs
-            TITLE="Date Of Appointment"
-            TYPE="date"
-            PLACEHOLDER=""
-            bind:this={bgyVarStore.dateOfAppointment}
-          />
-        </div>
-
-        <div class="flex gap-2">
-          <Button TITLE="Submit" on:click={updateData(editData.id)} />
-          <Button
-            TITLE="Cancel"
-            on:click={() => {
-              showCertEditLogic.set(false);
-            }}
-          />
-        </div>
-      </div>
-    {/if}
-
-    <div class="relative ">
+    <div class="relative">
       {#if $showPrintModel}
-      <img src={reportHeader} alt="" style="margin-top: -130px; margin-bottom: 100px" />
-    {/if}
+        <img
+          src={reportHeader}
+          alt=""
+          style="margin-top: -130px; margin-bottom: 100px"
+        />
+      {/if}
       <table class="w-full text-sm text-left text-gray-500">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50">
           <tr>
             <th
-                scope="col"
-                class="px-6 py-3"
-                on:click={() => {
-                  if (headerSortAscending.firstName == undefined) {
-                    headerSortAscending.firstName = true;
-                  } else {
-                    headerSortAscending.firstName =
-                      !headerSortAscending.firstName;
-                  }
-                  resetSort("firstName", headerSortAscending.firstName);
-                  sortTable("firstName", headerSortAscending.firstName);
-                }}
-              >
-                <div class="flex justify-center gap-2 items-center">
-                  firstname
-                  <span
-                    class={`sort-indicator 
+              scope="col"
+              class="px-6 py-3"
+              on:click={() => {
+                if (headerSortAscending.firstName == undefined) {
+                  headerSortAscending.firstName = true;
+                } else {
+                  headerSortAscending.firstName =
+                    !headerSortAscending.firstName;
+                }
+                resetSort("firstName", headerSortAscending.firstName);
+                sortTable("firstName", headerSortAscending.firstName);
+              }}
+            >
+              <div class="flex justify-center gap-2 items-center">
+                firstname
+                <span
+                  class={`sort-indicator 
                 ${
                   headerSortAscending.firstName == undefined
                     ? ""
@@ -518,27 +502,27 @@
                       : "desc"
                 }
                 `}
-                  ></span>
-                </div>
-              </th>
-              <th
-                scope="col"
-                class="px-6 py-3"
-                on:click={() => {
-                  if (headerSortAscending.middleInitial == undefined) {
-                    headerSortAscending.middleInitial = true;
-                  } else {
-                    headerSortAscending.middleInitial =
-                      !headerSortAscending.middleInitial;
-                  }
-                  resetSort("middleInitial", headerSortAscending.middleInitial);
-                  sortTable("middleInitial", headerSortAscending.middleInitial);
-                }}
-              >
-                <div class="flex justify-center gap-2 items-center">
-                  MI
-                  <span
-                    class={`sort-indicator 
+                ></span>
+              </div>
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-3"
+              on:click={() => {
+                if (headerSortAscending.middleInitial == undefined) {
+                  headerSortAscending.middleInitial = true;
+                } else {
+                  headerSortAscending.middleInitial =
+                    !headerSortAscending.middleInitial;
+                }
+                resetSort("middleInitial", headerSortAscending.middleInitial);
+                sortTable("middleInitial", headerSortAscending.middleInitial);
+              }}
+            >
+              <div class="flex justify-center gap-2 items-center">
+                MI
+                <span
+                  class={`sort-indicator 
                 ${
                   headerSortAscending.middleInitial == undefined
                     ? ""
@@ -547,27 +531,26 @@
                       : "desc"
                 }
                 `}
-                  ></span>
-                </div>
-              </th>
-              <th
-                scope="col"
-                class="px-6 py-3"
-                on:click={() => {
-                  if (headerSortAscending.lastName == undefined) {
-                    headerSortAscending.lastName = true;
-                  } else {
-                    headerSortAscending.lastName =
-                      !headerSortAscending.lastName;
-                  }
-                  resetSort("lastName", headerSortAscending.lastName);
-                  sortTable("lastName", headerSortAscending.lastName);
-                }}
-              >
-                <div class="flex justify-center gap-2 items-center">
-                  lastName
-                  <span
-                    class={`sort-indicator 
+                ></span>
+              </div>
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-3"
+              on:click={() => {
+                if (headerSortAscending.lastName == undefined) {
+                  headerSortAscending.lastName = true;
+                } else {
+                  headerSortAscending.lastName = !headerSortAscending.lastName;
+                }
+                resetSort("lastName", headerSortAscending.lastName);
+                sortTable("lastName", headerSortAscending.lastName);
+              }}
+            >
+              <div class="flex justify-center gap-2 items-center">
+                lastName
+                <span
+                  class={`sort-indicator 
                 ${
                   headerSortAscending.lastName == undefined
                     ? ""
@@ -576,27 +559,27 @@
                       : "desc"
                 }
                 `}
-                  ></span>
-                </div>
-              </th>
-              <th
-                scope="col"
-                class="px-6 py-3"
-                on:click={() => {
-                  if (headerSortAscending.suffixName == undefined) {
-                    headerSortAscending.suffixName = true;
-                  } else {
-                    headerSortAscending.suffixName =
-                      !headerSortAscending.suffixName;
-                  }
-                  resetSort("suffixName", headerSortAscending.suffixName);
-                  sortTable("suffixName", headerSortAscending.suffixName);
-                }}
-              >
-                <div class="flex justify-center gap-2 items-center">
-                  Suffix
-                  <span
-                    class={`sort-indicator 
+                ></span>
+              </div>
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-3"
+              on:click={() => {
+                if (headerSortAscending.suffixName == undefined) {
+                  headerSortAscending.suffixName = true;
+                } else {
+                  headerSortAscending.suffixName =
+                    !headerSortAscending.suffixName;
+                }
+                resetSort("suffixName", headerSortAscending.suffixName);
+                sortTable("suffixName", headerSortAscending.suffixName);
+              }}
+            >
+              <div class="flex justify-center gap-2 items-center">
+                Suffix
+                <span
+                  class={`sort-indicator 
                 ${
                   headerSortAscending.suffixName == undefined
                     ? ""
@@ -605,27 +588,30 @@
                       : "desc"
                 }
                 `}
-                  ></span>
-                </div>
-              </th>
-              <th
-                scope="col"
-                class="px-6 py-3"
-                on:click={() => {
-                  if (headerSortAscending.completeAddress == undefined) {
-                    headerSortAscending.completeAddress = true;
-                  } else {
-                    headerSortAscending.completeAddress =
-                      !headerSortAscending.completeAddress;
-                  }
-                  resetSort("completeAddress", headerSortAscending.completeAddress);
-                  sortTable("address", headerSortAscending.completeAddress);
-                }}
-              >
-                <div class="flex justify-center gap-2 items-center">
-                  Address
-                  <span
-                    class={`sort-indicator 
+                ></span>
+              </div>
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-3"
+              on:click={() => {
+                if (headerSortAscending.completeAddress == undefined) {
+                  headerSortAscending.completeAddress = true;
+                } else {
+                  headerSortAscending.completeAddress =
+                    !headerSortAscending.completeAddress;
+                }
+                resetSort(
+                  "completeAddress",
+                  headerSortAscending.completeAddress
+                );
+                sortTable("address", headerSortAscending.completeAddress);
+              }}
+            >
+              <div class="flex justify-center gap-2 items-center">
+                Address
+                <span
+                  class={`sort-indicator 
                 ${
                   headerSortAscending.completeAddress == undefined
                     ? ""
@@ -634,18 +620,17 @@
                       : "desc"
                 }
                 `}
-                  ></span>
-                </div>
-              </th>
-              <th
+                ></span>
+              </div>
+            </th>
+            <th
               scope="col"
               class="px-6 py-3"
               on:click={() => {
                 if (headerSortAscending.age == undefined) {
                   headerSortAscending.age = true;
                 } else {
-                  headerSortAscending.age =
-                    !headerSortAscending.age;
+                  headerSortAscending.age = !headerSortAscending.age;
                 }
                 resetSort("age", headerSortAscending.age);
                 sortTable("age", headerSortAscending.age);
@@ -695,7 +680,7 @@
                 ></span>
               </div>
             </th>
-            
+
             <th scope="col" class="px-6 py-3"> purpose </th>
             <th scope="col" class="px-6 py-3"> Valid ID </th>
             <th
@@ -708,8 +693,14 @@
                   headerSortAscending.dateOfAppointment =
                     !headerSortAscending.dateOfAppointment;
                 }
-                resetSort("dateOfAppointment", headerSortAscending.dateOfAppointment);
-                sortTable("dateOfAppointment", headerSortAscending.dateOfAppointment);
+                resetSort(
+                  "dateOfAppointment",
+                  headerSortAscending.dateOfAppointment
+                );
+                sortTable(
+                  "dateOfAppointment",
+                  headerSortAscending.dateOfAppointment
+                );
               }}
             >
               <div class="flex justify-center gap-2 items-center">
@@ -727,14 +718,70 @@
                 ></span>
               </div>
             </th>
+            <th
+              scope="col"
+              class="px-6 py-3"
+              on:click={() => {
+                if (headerSortAscending.civilStatus == undefined) {
+                  headerSortAscending.civilStatus = true;
+                } else {
+                  headerSortAscending.civilStatus = !headerSortAscending.civilStatus;
+                }
+                resetSort("civilStatus", headerSortAscending.civilStatus);
+                sortTable("civilStatus", headerSortAscending.civilStatus);
+              }}
+            >
+              <div class="flex justify-center gap-2 items-center">
+                civil Status
+                <span
+                  class={`sort-indicator 
+                ${
+                  headerSortAscending.civilStatus == undefined
+                    ? ""
+                    : headerSortAscending.civilStatus
+                      ? "asc"
+                      : "desc"
+                }
+                `}
+                ></span>
+              </div>
+            </th>
+            <th
+              scope="col"
+              class="px-6 py-3"
+              on:click={() => {
+                if (headerSortAscending.gender == undefined) {
+                  headerSortAscending.gender = true;
+                } else {
+                  headerSortAscending.gender = !headerSortAscending.gender;
+                }
+                resetSort("gender", headerSortAscending.gender);
+                sortTable("gender", headerSortAscending.gender);
+              }}
+            >
+              <div class="flex justify-center gap-2 items-center">
+                gender
+                <span
+                  class={`sort-indicator 
+                ${
+                  headerSortAscending.gender == undefined
+                    ? ""
+                    : headerSortAscending.gender
+                      ? "asc"
+                      : "desc"
+                }
+                `}
+                ></span>
+              </div>
+            </th>
             <th scope="col" class="px-6 py-3"> status </th>
             {#if !$showPrintModel}
               <th scope="col" class="px-6 py-3"> action </th>
-              {/if}
+            {/if}
           </tr>
         </thead>
         <tbody>
-          {#each $onSnapsBgyCert as cert}
+          {#each $onSnapsBgyCert as cert, i}
             <tr class="bg-white border-b">
               <th
                 scope="row"
@@ -766,50 +813,176 @@
               </td>
               <td class="px-6 py-4"> {cert.dateOfAppointment} </td>
               {#if $showPrintModel}
-              <td class="px-6 py-4"> {cert.status} </td>
+                <td class="px-6 py-4"> {cert.civilStatus} </td>
               {/if}
-            {#if !$showPrintModel}
-              <td class="px-6 py-4">
-                <select
-                  class="bg-white"
-                  bind:value={cert.status}
-                  on:change={() => updateStatus(cert.id, cert.status, cert.appointmentOwner)}
-                >
-                  <option value="Processing">On Process</option>
-                  <option value="Ready for pickup">For Pickup</option>
-                  <option value="Claimed">Completed</option>
-                </select>
-              </td>
-              <td class="px-6 py-4">
-                <div class="flex bg-slate-10 w-[30%] gap-2">
-                  <button
-                    class=" rounded-lg hover:scale-105 duration-700 text-black w-full p-2 hover:bg-orange-300 border-b-2 border-white"
-                    on:click={() => {
-                      editValueHandler(cert);
-                    }}><i class="ri-edit-2-line" /></button
+              {#if !$showPrintModel}
+                <td class="px-6 py-4">
+                  <select
+                    class="bg-white"
+                    bind:value={cert.civilStatus}
+                    on:change={() => updateCivil(cert.id, cert.civilStatus)}
                   >
+                    <option value="Single">Single</option>
+                    <option value="Married">Married</option>
+                    <option value="Widowed">Widowed</option>
+                    <option value="Divorced">Divorced</option>
+                  </select>
+                </td>
+              {/if}
+              {#if $showPrintModel}
+                <td class="px-6 py-4"> {cert.gender} </td>
+              {/if}
+              {#if !$showPrintModel}
+                <td class="px-6 py-4">
+                  <select
+                    class="bg-white"
+                    bind:value={cert.gender}
+                    on:change={() => updateGender(cert.id, cert.gender)}
+                  >
+                    <option value="Single">Male</option>
+                    <option value="Married">Female</option>
+                  </select>
+                </td>
+              {/if}
+              {#if $showPrintModel}
+                <td class="px-6 py-4"> {cert.status} </td>
+              {/if}
+              {#if !$showPrintModel}
+                <td class="px-6 py-4">
+                  <select
+                    class="bg-white"
+                    bind:value={cert.status}
+                    on:change={() =>
+                      updateStatus(cert.id, cert.status, cert.appointmentOwner)}
+                  >
+                    <option value="Processing">On Process</option>
+                    <option value="Ready for pickup">For Pickup</option>
+                    <option value="Claimed">Completed</option>
+                  </select>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex bg-slate-10 w-[30%] gap-2">
+                    <button
+                      class=" rounded-lg hover:scale-105 duration-700 text-black w-full p-2 hover:bg-orange-300 border-b-2 border-white"
+                      on:click={() => {
+                        editValueHandler(cert, i);
+                      }}><i class="ri-edit-2-line" /></button
+                    >
 
-                  <button
-                    class="font-bold rounded-lg hover:scale-105 duration-700 text-red-800 hover:text-white w-full p-2 hover:bg-red-600 border-b-2 border-white"
-                    on:click={removeData(cert.id)}
-                    ><i class="ri-delete-bin-line" /></button
-                  >
+                    <button
+                      class="font-bold rounded-lg hover:scale-105 duration-700 text-red-800 hover:text-white w-full p-2 hover:bg-red-600 border-b-2 border-white"
+                      on:click={removeData(cert.id)}
+                      ><i class="ri-delete-bin-line" /></button
+                    >
 
-                  <button
-                    class=" text-blue-800 w-full p-2 hover:bg-blue-600 border-b-2 hover:text-white rounded-lg duration-700"
-                    on:click={() => printPdf(cert)}
-                    ><i class="ri-printer-line"></i></button
-                  >
-                </div>
-              </td>
+                    <button
+                      class=" text-blue-800 w-full p-2 hover:bg-blue-600 border-b-2 hover:text-white rounded-lg duration-700"
+                      on:click={() => printPdf(cert)}
+                      ><i class="ri-printer-line"></i></button
+                    >
+                  </div>
+                </td>
               {/if}
             </tr>
+            {#if $showCertEditLogic && $compareCertValue == i}
+              <div class="">
+                <div
+                  class="flex bg-white flex-col gap-2 p-4 max-w-fit mx-auto rounded-lg mt-2 absolute left-0 right-0 border-2 border-slate-200 z-10"
+                >
+                  <p class="text-xl text-center font-bold p-2 text-slate-500">
+                    Modify Values
+                  </p>
+                  <div class="">
+                    <Inputs
+                      TITLE="First Name"
+                      PLACEHOLDER="First Name"
+                      bind:this={bgyVarStore.firstName}
+                    />
+                  </div>
+                  <div class="">
+                    <Inputs
+                      TITLE="M.I."
+                      PLACEHOLDER="Middle Initial"
+                      bind:this={bgyVarStore.middleInitial}
+                    />
+                  </div>
+
+                  <div class="">
+                    <Inputs
+                      TITLE="Last Name"
+                      PLACEHOLDER="Last Name"
+                      bind:this={bgyVarStore.lastName}
+                    />
+                  </div>
+                  <div class="">
+                    <Inputs
+                      TITLE="Suffix"
+                      PLACEHOLDER="Suffix"
+                      bind:this={bgyVarStore.suffixName}
+                    />
+                  </div>
+
+                  <div class="flex justify-center gap-2">
+                    <div class="">
+                      <Inputs
+                        TITLE="Length of stay"
+                        PLACEHOLDER="Length of stay"
+                        bind:this={bgyVarStore.lengthOfStay}
+                      />
+                    </div>
+                    <div class="">
+                      <Inputs
+                        TITLE="Purpose"
+                        PLACEHOLDER="purpose"
+                        bind:this={bgyVarStore.purpose}
+                      />
+                    </div>
+                  </div>
+
+                  <div class="">
+                    <Inputs
+                      TITLE="Complete Address:"
+                      PLACEHOLDER="Complete Address"
+                      bind:this={bgyVarStore.address}
+                    />
+                  </div>
+
+                  <div class="">
+                    <Inputs
+                      TITLE="Date Of Appointment:"
+                      TYPE="date"
+                      PLACEHOLDER=""
+                      bind:this={bgyVarStore.dateOfAppointment}
+                    />
+                  </div>
+
+                  <div class="flex gap-2">
+                    <button
+                      class="bg-orange-300 px-4 py-2 rounded-lg w-1/2"
+                      on:click={updateData(cert.id)}
+                    >
+                      Update
+                    </button>
+                    <button
+                      class="bg-red-300 px-4 py-2 rounded-lg w-1/2"
+                      on:click={() => {
+                        console.log("asdfasdf");
+                        $showCertEditLogic = false;
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            {/if}
           {/each}
         </tbody>
       </table>
     </div>
   </div>
 </div>
+
 <style>
   /* Add some styling for the sorting indicator */
   .sort-indicator {
