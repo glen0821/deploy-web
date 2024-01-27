@@ -14,6 +14,7 @@
   import bgyClearance from "../Images/bgyClearance.jpg";
   import PrintContent from "./PrintContent.svelte";
 
+
   //database calls and hooks
   import { auth, db } from "../../db/firebase";
   import {

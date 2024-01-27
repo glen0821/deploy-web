@@ -12,7 +12,8 @@
   import { showPrintModel, formattedDate } from "./stateStore";
 
   import bgyClearance from "../Images/bgyClearance.jpg";
-  import PrintContent from "./PrintContent.svelte";
+  import IndigencyContent from "./IndigencyContent.svelte";
+
 
   //database calls and hooks
   import { auth, db } from "../../db/firebase";
@@ -236,7 +237,7 @@
       return false;
     }
 
-    const printContent = new PrintContent({
+    const printContent = new IndigencyContent({
       target: mywindow.document.body,
       props: {
         documentTitle: "hello world",
