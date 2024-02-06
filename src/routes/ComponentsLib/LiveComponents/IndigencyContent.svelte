@@ -5,7 +5,7 @@
   export let completeName = "";
   export let address = "";
   export let age = "";
-  export let birthdate = "";
+  export let birthDate = "";
   export let dateOfAppointment = "";
   export let purpose = "";
   export let gender = "";
@@ -587,8 +587,8 @@
     .box .birth-day {
       position: absolute;
       width: 95px;
-      top: 304px;
-      left: 214px;
+      top: 289px;
+      left: 365px;
       font-family: "Inter-Regular", Helvetica;
       font-weight: 400;
       color: #000000;
@@ -666,7 +666,7 @@
       position: absolute;
       width: 37px;
       top: 289px;
-      left: 405px;
+      left: 334px;
       font-family: "Inter-Regular", Helvetica;
       font-weight: 400;
       color: #000000;
@@ -735,7 +735,7 @@
       position: absolute;
       width: 280px;
       top: 295px;
-      left: 312px;
+      left: 214px;
       font-family: "Inter-Regular", Helvetica;
       font-weight: 400;
       color: #000000;
@@ -864,7 +864,7 @@
         {completeName}
       </div>
       <div class="birth-day" style="text-decoration: underline;">
-        {birthdate}
+        {birthDate}
       </div>
       <div class="address" style="text-decoration: underline;">
         {address}
