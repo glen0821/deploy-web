@@ -341,9 +341,9 @@
                   <td class="px-6 py-4"> {complaintData.address} </td>
                   {#if !$showPrintModel}
                     <td class="px-6 py-4">
-                      <a href={complaintData.evidenceURL}>
+                      <a href={(complaintData.evidenceURL != null ? complaintData.evidenceURL : complaintData.complaintMediaUrl)}>
                         <img
-                          src={complaintData.evidenceURL}
+                          src={(complaintData.evidenceURL != null ? complaintData.evidenceURL : complaintData.complaintMediaUrl)}
                           alt="ID Picture"
                           class="h-10 w-10"
                         />
@@ -445,9 +445,9 @@
                   <td class="px-6 py-4"> {complaintData.defendantLocation} </td>
                   {#if !$showPrintModel}
                     <td class="px-6 py-4">
-                      <a href={complaintData.evidenceURL}>
+                      <a href={(complaintData.evidenceURL != null ? complaintData.evidenceURL : complaintData.complaintMediaUrl)}>
                         <img
-                          src={complaintData.evidenceURL}
+                          src={(complaintData.evidenceURL != null ? complaintData.evidenceURL : complaintData.complaintMediaUrl)}
                           alt="ID Picture"
                           class="h-10 w-10"
                         />
