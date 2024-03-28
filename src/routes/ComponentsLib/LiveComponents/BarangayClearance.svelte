@@ -14,7 +14,6 @@
   import bgyClearance from "../Images/bgyClearance.jpg";
   import PrintContent from "./PrintContent.svelte";
 
-
   //database calls and hooks
   import { auth, db } from "../../db/firebase";
   import {
@@ -30,6 +29,8 @@
     setDoc,
     where,
   } from "firebase/firestore";
+  import { writable } from "svelte/store";
+  export const setDateIndex = writable(-1);
 
   //handler to show add modal
   const toShowAddModal = () => {
@@ -153,9 +154,22 @@
         purpose: bgyVarStore.purpose.BINDTHIS,
         dateOfAppointment: bgyVarStore.dateOfAppointment.BINDTHIS,
       },
-      { merge: true }
+      { merge: true },
     );
     compareClearanceValue.set(-1);
+  };
+
+  const setDate = async (data) => {
+    const docRef = doc(colRef, data);
+    await setDoc(
+      docRef,
+      {
+        lastUpdated: serverTimestamp(),
+        dateOfAppointment: bgyVarStore.dateOfAppointment.BINDTHIS,
+      },
+      { merge: true },
+    );
+    setDateIndex.set(-1);
   };
 
   //showModalComparison
@@ -170,9 +184,16 @@
       bgyVarStore.lengthOfStay.BINDTHIS = data.lengthOfStay;
       bgyVarStore.purpose.BINDTHIS = data.purpose;
       bgyVarStore.dateOfAppointment.BINDTHIS = fixDateFormat(
-        data.dateOfAppointment
+        data.dateOfAppointment,
       );
     }, 100);
+  };
+
+  const setDateHandler = (data, index) => {
+    setDateIndex.set(index);
+    setTimeout(function () {
+      bgyVarStore.dateOfAppointment.BINDTHIS = fixDateFormat(data.dateOfAppointment);
+    }, 500);
   };
 
   const handlerSearch = () => {
@@ -180,7 +201,7 @@
       const q = query(
         colRef,
         orderBy("createdAt", "desc"),
-        where("completeName", "==", bgyVarStore.kwiri)
+        where("completeName", "==", bgyVarStore.kwiri),
       );
       onSnapshot(q, (snapshots) => {
         let fbData = [];
@@ -229,7 +250,7 @@
     const mywindow = window.open(
       "",
       "PRINT",
-      "height=891,width=649, initial-scale=1.0"
+      "height=891,width=649, initial-scale=1.0",
     );
     console.log(dataForPrint);
 
@@ -616,7 +637,7 @@
                   }
                   resetSort(
                     "completeAddress",
-                    headerSortAscending.completeAddress
+                    headerSortAscending.completeAddress,
                   );
                   sortTable("address", headerSortAscending.completeAddress);
                 }}
@@ -708,11 +729,11 @@
                   }
                   resetSort(
                     "dateOfAppointment",
-                    headerSortAscending.dateOfAppointment
+                    headerSortAscending.dateOfAppointment,
                   );
                   sortTable(
                     "dateOfAppointment",
-                    headerSortAscending.dateOfAppointment
+                    headerSortAscending.dateOfAppointment,
                   );
                 }}
               >
@@ -835,7 +856,63 @@
                   </a>
                 </td>
                 <td class="px-6 py-4">
-                  {barangayClearance.dateOfAppointment}
+                  {#if barangayClearance.dateOfAppointment == undefined}
+                    <button
+                      class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
+                      on:click={() => {
+                        setDateHandler(barangayClearance, i);
+                      }}
+                    >
+                      Set Date
+                    </button>
+                  {:else}
+                    <span
+                    class="cursor-pointer"
+                      on:click={() => {
+                        setDateHandler(barangayClearance, i);
+                      }}
+                    >
+                      {barangayClearance.dateOfAppointment}
+                    </span>
+                  {/if}
+                  {#if $setDateIndex === i}
+                    <div class="">
+                      <div
+                        class="flex bg-white flex-col gap-2 p-4 max-w-fit mx-auto rounded-lg mt-2 absolute left-0 right-0 border-2 border-slate-200 z-10"
+                      >
+                        <p
+                          class="text-xl text-center font-bold p-2 text-slate-500"
+                        >
+                          Set Date
+                        </p>
+                        <div class="">
+                          <Inputs
+                            TITLE="Date Of Appointment:"
+                            TYPE="date"
+                            PLACEHOLDER=""
+                            bind:this={bgyVarStore.dateOfAppointment}
+                          />
+                        </div>
+
+                        <div class="flex gap-2">
+                          <button
+                            class="bg-orange-300 px-4 py-2 rounded-lg w-1/2"
+                            on:click={setDate(barangayClearance.id)}
+                          >
+                            Set
+                          </button>
+                          <button
+                            class="bg-red-300 px-4 py-2 rounded-lg w-1/2"
+                            on:click={() => {
+                              setDateIndex.set(-1);
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  {/if}
                 </td>
                 {#if $showPrintModel}
                   <td class="px-6 py-4"> {barangayClearance.civilStatus} </td>
@@ -848,7 +925,7 @@
                       on:change={() =>
                         updateCivil(
                           barangayClearance.id,
-                          barangayClearance.civilStatus
+                          barangayClearance.civilStatus,
                         )}
                     >
                       <option value="Single">Single</option>
@@ -869,7 +946,7 @@
                       on:change={() =>
                         updateGender(
                           barangayClearance.id,
-                          barangayClearance.gender
+                          barangayClearance.gender,
                         )}
                     >
                       <option value="Single">Male</option>
@@ -894,7 +971,7 @@
                         updateStatus(
                           barangayClearance.id,
                           barangayClearance.status,
-                          barangayClearance.appointmentOwner
+                          barangayClearance.appointmentOwner,
                         )}
                     >
                       <option value="Processing">On Process</option>

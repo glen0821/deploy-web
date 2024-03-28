@@ -16,6 +16,7 @@
   import BarangayClearance from "../LiveComponents/BarangayClearance.svelte";
   import Complaint from "../LiveComponents/Complaint.svelte";
   import BarangayIndigency from "../LiveComponents/BarangayIndigency.svelte";
+    import Ordinances from "../LiveComponents/Ordinances.svelte";
 
   //slide menu
   const showSliderMenu = () => {
@@ -70,6 +71,8 @@
     <BarangayIndigency />
   {:else if $navSelections === "Complaints"}
     <Complaint />
+    {:else if $navSelections === "Ordinances"}
+    <Ordinances />
   {/if}
 </div>
 

@@ -2,7 +2,7 @@
    
     import Login from "./ComponentsLib/Authentication/Login.svelte";
     import Nav from "./ComponentsLib/BoundComponents/Nav.svelte";
-
+    import "../app.css";
     
     //database calls and hooks
     import { auth } from "./db/firebase";

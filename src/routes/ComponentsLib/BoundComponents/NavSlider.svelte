@@ -25,6 +25,7 @@
     "Barangay Clearance",
     "Barangay Indigency",
     "Complaints",
+    "Ordinances",
   ];
 
   let newSelections = [
@@ -64,6 +65,10 @@
     {
       svg: complaints,
       nav: "Complaints",
+    },
+    {
+      svg: complaints,
+      nav: "Ordinances",
     },
   ];
 
