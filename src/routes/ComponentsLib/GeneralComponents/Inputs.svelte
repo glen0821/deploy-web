@@ -6,6 +6,8 @@
   export let TITLE = "Overide title";
   export let TYPE = "text";
   export let COLOR = "black";
+  export let ID = "";
+  export let ONCLICK =()=>{};
 </script>
 
 {#if TYPE === "text"}
@@ -45,6 +47,8 @@
   <input
     type="date"
     bind:value={BINDTHIS}
+    id={ID}
+    on:click={ONCLICK}
     class="w-full h-10 bg-slate-100 p-2 focus:outline-none"
   />
 {:else if TYPE === "cordion"}
@@ -56,4 +60,13 @@
     <option value="Male">Male</option>
     <option value="Female">Female</option>
   </select>
+  {:else if TYPE === "file"}
+  <p class="p-2 font-bold text-{COLOR}">{TITLE}</p>
+  <input
+    type="file"
+    accept="image/*"
+    on:change={(event) => BINDTHIS = event.target.files[0]}
+    class="w-full h-10 bg-slate-100 p-2 focus:outline-none"
+    id={ID}
+  />
 {/if}

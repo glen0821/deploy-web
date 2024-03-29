@@ -70,6 +70,10 @@
       svg: complaints,
       nav: "Ordinances",
     },
+    {
+      svg: complaints,
+      nav: "Officials",
+    },
   ];
 
   //value grabber from menu

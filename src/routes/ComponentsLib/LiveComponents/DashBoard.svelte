@@ -89,9 +89,9 @@
   onSnapshot(colRef6, (snapshots) => {
     let counterConvert = 0;
     snapshots.docs.forEach((doc) => {
-      let fbStoreCount = Number(doc.data().bgyClearanceCounter);
-      counterConvert += fbStoreCount;
+      counterConvert++;
     });
+    console.log(counterConvert)
     counter6 = counterConvert;
   });
 </script>

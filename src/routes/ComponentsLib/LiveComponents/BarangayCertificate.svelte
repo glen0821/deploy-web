@@ -36,6 +36,8 @@
   // import PrintContent from "./PrintContent.svelte";
   import CertificateContent from "./CertificateContent.svelte";
   import reportHeader from "./images/header_report.png";
+  import { writable } from "svelte/store";
+ 
 
   // $: console.log(html2pdf);
 
@@ -309,6 +311,48 @@
       { merge: true }
     );
     $showCertEditLogic = false;
+  };
+  const setDateIndex = writable(-1);
+
+  const setDateHandler = (data, index) => {
+    setDateIndex.set(index);
+    setTimeout(function () {
+      bgyVarStore.dateOfAppointment.BINDTHIS = fixDateFormat(
+        data.dateOfAppointment
+      );
+    }, 500);
+  };
+
+  const setDate = async (data) => {
+    const docRef = doc(colRef, data);
+    await setDoc(
+      docRef,
+      {
+        lastUpdated: serverTimestamp(),
+        dateOfAppointment: bgyVarStore.dateOfAppointment.BINDTHIS,
+      },
+      { merge: true }
+    );
+    setDateIndex.set(-1);
+  };
+
+  import flatpickr from "flatpickr";
+  import 'flatpickr/dist/flatpickr.css'
+  const disableWeekends = (event) => {
+    const element = event.target;
+    if(element.getAttribute("picker_set") == "yes"){
+      return
+    }
+    flatpickr(element, {
+      "disable": [
+        function(date) {
+            return (date.getDay() === 0 || date.getDay() === 6);
+        }
+    ],
+    });
+    element.setAttribute("picker_set", "yes")
+    
+    
   };
 </script>
 
@@ -725,7 +769,8 @@
                 if (headerSortAscending.civilStatus == undefined) {
                   headerSortAscending.civilStatus = true;
                 } else {
-                  headerSortAscending.civilStatus = !headerSortAscending.civilStatus;
+                  headerSortAscending.civilStatus =
+                    !headerSortAscending.civilStatus;
                 }
                 resetSort("civilStatus", headerSortAscending.civilStatus);
                 sortTable("civilStatus", headerSortAscending.civilStatus);
@@ -811,7 +856,67 @@
                   />
                 </a>
               </td>
-              <td class="px-6 py-4"> {cert.dateOfAppointment} </td>
+              <td class="px-6 py-4">
+                {#if cert.dateOfAppointment == undefined}
+                  <button
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
+                    on:click={() => {
+                      setDateHandler(cert, i);
+                    }}
+                  >
+                    Set Date
+                  </button>
+                {:else}
+                  <span
+                    class="cursor-pointer"
+                    on:click={() => {
+                      setDateHandler(cert, i);
+                    }}
+                  >
+                    {cert.dateOfAppointment}
+                  </span>
+                {/if}
+                {#if $setDateIndex === i}
+                  <div class="">
+                    <div
+                      class="flex bg-white flex-col gap-2 p-4 max-w-fit mx-auto rounded-lg mt-2 absolute left-0 right-0 border-2 border-slate-200 z-10"
+                    >
+                      <p
+                        class="text-xl text-center font-bold p-2 text-slate-500"
+                      >
+                        Set Date
+                      </p>
+                      <div class="">
+                        <Inputs
+                          TITLE="Date Of Appointment:"
+                          TYPE="date"
+                          PLACEHOLDER=""
+                          ID="date_appointment"
+                          ONCLICK={disableWeekends}
+                          bind:this={bgyVarStore.dateOfAppointment}
+                        />
+                      </div>
+
+                      <div class="flex gap-2">
+                        <button
+                          class="bg-orange-300 px-4 py-2 rounded-lg w-1/2"
+                          on:click={setDate(cert.id)}
+                        >
+                          Set
+                        </button>
+                        <button
+                          class="bg-red-300 px-4 py-2 rounded-lg w-1/2"
+                          on:click={() => {
+                            setDateIndex.set(-1);
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                {/if}
+              </td>
               {#if $showPrintModel}
                 <td class="px-6 py-4"> {cert.civilStatus} </td>
               {/if}

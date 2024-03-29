@@ -2,7 +2,7 @@
   import Button from "../GeneralComponents/Button.svelte";
   import Inputs from "../GeneralComponents/Inputs.svelte";
   import { fly } from "svelte/transition";
-
+  import { writable } from "svelte/store";
   import {
     onSnapsComplaint,
     showComplaintAddModal,
@@ -61,6 +61,26 @@
     });
   };
 
+  
+  import flatpickr from "flatpickr";
+  import 'flatpickr/dist/flatpickr.css'
+  const disableWeekends = (event) => {
+    const element = event.target;
+    if(element.getAttribute("picker_set") == "yes"){
+      return
+    }
+    flatpickr(element, {
+      "disable": [
+        function(date) {
+            return (date.getDay() === 0 || date.getDay() === 6);
+        }
+    ],
+    });
+    element.setAttribute("picker_set", "yes")
+    
+    
+  };
+
   //fetch data from database
   const colRef = collection(db, "Complaints");
   const q = query(colRef, orderBy("createdAt", "desc"));
@@ -97,6 +117,22 @@
     );
   };
 
+  function fixDateFormat(originalDate) {
+    // Split the date string into year, month, and day
+    var parts = originalDate.split("-");
+
+    // Pad the month part with leading zero if it's a single digit
+    parts[1] = parts[1].length === 1 ? "0" + parts[1] : parts[1];
+
+    // Pad the day part with leading zero if it's a single digit
+    parts[2] = parts[2].length === 1 ? "0" + parts[2] : parts[2];
+
+    // Reconstruct the date string with the corrected format
+    var fixedDate = parts.join("-");
+
+    return fixedDate;
+  }
+
   //showModalComparison
   const editValueHandler = (data) => {
     compareComplaintValue.set(data);
@@ -126,7 +162,6 @@
       lastUpdated: serverTimestamp(),
     };
     await setDoc(docRef, updatedData, { merge: true });
-
 
     const notifDocRef = doc(collection(db, "notifications"));
     let message;
@@ -168,9 +203,35 @@
   };
 
   // let printing = false;
+  const setDateIndex = writable(-1);
+
+  const setDateHandler = (data, index) => {
+    setDateIndex.set(index);
+    setTimeout(function () {
+      complaintVarStore.dateOfAppointment.BINDTHIS = fixDateFormat(
+        data.dateOfAppointment
+      );
+    }, 500);
+  };
+
+  const setDate = async (data) => {
+    const docRef = doc(colRef, data);
+    await setDoc(
+      docRef,
+      {
+        lastUpdated: serverTimestamp(),
+        dateOfAppointment: complaintVarStore.dateOfAppointment.BINDTHIS,
+      },
+      { merge: true }
+    );
+    setDateIndex.set(-1);
+  };
 </script>
 
-<div class="m-2 mx-auto text-xs" style="margin-bottom: {showPrintModel? "20vh" : "0px"}">
+<div
+  class="m-2 mx-auto text-xs"
+  style="margin-bottom: {showPrintModel ? '20vh' : '0px'}"
+>
   <div class="min-h-[50vh] p-10">
     <div class="flex gap-2 items-center mb-2">
       <div class="w-full flex gap-2">
@@ -200,31 +261,33 @@
       {#if $showPrintModel}
         <div class="fixed bottom-0 top-0 left-0 right-0 bg-white">
           <div class="mx-auto max-w-[1000px] mt-[20vh] p-10">
-            <div class="fixed bottom-0 right-0 p-10"  style="bottom: -10px !important;">
+            <div
+              class="fixed bottom-0 right-0 p-10"
+              style="bottom: -10px !important;"
+            >
               <div class="flex gap-2">
                 {#if !$printing}
-                <div class="">
-                  <Button
-                    TITLE="Print Now"
-                    on:click={() => {
-                      $printing = true;
-                      // print();
-                      // $printing = false;
-                      setTimeout(() => print(), 100)
-                      setTimeout(() => {
-                        $printing = false;
-                        $showPrintModel = false;
-                      }, 2000)
-
-                    }}
-                  />
-                </div>
-                <div class="">
-                  <Button
-                    TITLE="Close"
-                    on:click={() => showPrintModel.set(false)}
-                  />
-                </div>
+                  <div class="">
+                    <Button
+                      TITLE="Print Now"
+                      on:click={() => {
+                        $printing = true;
+                        // print();
+                        // $printing = false;
+                        setTimeout(() => print(), 100);
+                        setTimeout(() => {
+                          $printing = false;
+                          $showPrintModel = false;
+                        }, 2000);
+                      }}
+                    />
+                  </div>
+                  <div class="">
+                    <Button
+                      TITLE="Close"
+                      on:click={() => showPrintModel.set(false)}
+                    />
+                  </div>
                 {/if}
               </div>
             </div>
@@ -295,10 +358,14 @@
       </div>
     {/if}
     <div class="" in:fly={{ x: 400, duration: 1000 }}>
-      <div class="relative ">
+      <div class="relative">
         {#if $showPrintModel}
-        <img src={reportHeader} alt="" style="margin-top: -130px; margin-bottom: 100px" />
-      {/if}
+          <img
+            src={reportHeader}
+            alt=""
+            style="margin-top: -130px; margin-bottom: 100px"
+          />
+        {/if}
         <table class="w-full text-sm text-left text-gray-500">
           <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
@@ -327,7 +394,67 @@
             {#each $onSnapsComplaint as complaintData, i}
               {#if complaintData.defendantName == ""}
                 <tr class="bg-white border-b">
-                  <td class="px-6 py-4"> {complaintData.dateOfAppointment} </td>
+                  <td class="px-6 py-4">
+                    {#if complaintData.dateOfAppointment == undefined}
+                    <button
+                      class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
+                      on:click={() => {
+                        setDateHandler(complaintData, i);
+                      }}
+                    >
+                      Set Date
+                    </button>
+                  {:else}
+                    <span
+                    class="cursor-pointer"
+                      on:click={() => {
+                        setDateHandler(complaintData, i);
+                      }}
+                    >
+                      {complaintData.dateOfAppointment}
+                    </span>
+                  {/if}
+                  {#if $setDateIndex === i}
+                    <div class="">
+                      <div
+                        class="flex bg-white flex-col gap-2 p-4 max-w-fit mx-auto rounded-lg mt-2 absolute left-0 right-0 border-2 border-slate-200 z-10"
+                      >
+                        <p
+                          class="text-xl text-center font-bold p-2 text-slate-500"
+                        >
+                          Set Date
+                        </p>
+                        <div class="">
+                          <Inputs
+                            TITLE="Date Of Appointment:"
+                            TYPE="date"
+                            PLACEHOLDER=""
+                            ONCLICK={disableWeekends}
+
+                            bind:this={complaintVarStore.dateOfAppointment}
+                          />
+                        </div>
+
+                        <div class="flex gap-2">
+                          <button
+                            class="bg-orange-300 px-4 py-2 rounded-lg w-1/2"
+                            on:click={setDate(complaintData.id)}
+                          >
+                            Set
+                          </button>
+                          <button
+                            class="bg-red-300 px-4 py-2 rounded-lg w-1/2"
+                            on:click={() => {
+                              setDateIndex.set(-1);
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  {/if}
+                  </td>
                   <th
                     scope="row"
                     class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
@@ -341,9 +468,15 @@
                   <td class="px-6 py-4"> {complaintData.address} </td>
                   {#if !$showPrintModel}
                     <td class="px-6 py-4">
-                      <a href={(complaintData.evidenceURL != null ? complaintData.evidenceURL : complaintData.complaintMediaUrl)}>
+                      <a
+                        href={complaintData.evidenceURL != null
+                          ? complaintData.evidenceURL
+                          : complaintData.complaintMediaUrl}
+                      >
                         <img
-                          src={(complaintData.evidenceURL != null ? complaintData.evidenceURL : complaintData.complaintMediaUrl)}
+                          src={complaintData.evidenceURL != null
+                            ? complaintData.evidenceURL
+                            : complaintData.complaintMediaUrl}
                           alt="ID Picture"
                           class="h-10 w-10"
                         />
@@ -364,7 +497,11 @@
                         class="bg-white"
                         bind:value={complaintData.status}
                         on:change={() =>
-                          updateStatus(complaintData.id, complaintData.status, complaintData.appointmentOwner)}
+                          updateStatus(
+                            complaintData.id,
+                            complaintData.status,
+                            complaintData.appointmentOwner
+                          )}
                       >
                         <option value="Processing">On Process</option>
                         <option value="ProcBrgy">Proceed To Barangay</option>
@@ -429,7 +566,67 @@
             {#each $onSnapsComplaint as complaintData, i}
               {#if complaintData.defendantName != ""}
                 <tr class="bg-white border-b">
-                  <td class="px-6 py-4"> {complaintData.dateOfAppointment} </td>
+                  <td class="px-6 py-4"> 
+                    {#if complaintData.dateOfAppointment == undefined}
+                    <button
+                      class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
+                      on:click={() => {
+                        setDateHandler(complaintData, i);
+                      }}
+                    >
+                      Set Date
+                    </button>
+                  {:else}
+                    <span
+                    class="cursor-pointer"
+                      on:click={() => {
+                        setDateHandler(complaintData, i);
+                      }}
+                    >
+                      {complaintData.dateOfAppointment}
+                    </span>
+                  {/if}
+                  {#if $setDateIndex === i}
+                    <div class="">
+                      <div
+                        class="flex bg-white flex-col gap-2 p-4 max-w-fit mx-auto rounded-lg mt-2 absolute left-0 right-0 border-2 border-slate-200 z-10"
+                      >
+                        <p
+                          class="text-xl text-center font-bold p-2 text-slate-500"
+                        >
+                          Set Date
+                        </p>
+                        <div class="">
+                          <Inputs
+                            TITLE="Date Of Appointment:"
+                            TYPE="date"
+                            PLACEHOLDER=""
+                            ONCLICK={disableWeekends}
+
+                            bind:this={complaintVarStore.dateOfAppointment}
+                          />
+                        </div>
+
+                        <div class="flex gap-2">
+                          <button
+                            class="bg-orange-300 px-4 py-2 rounded-lg w-1/2"
+                            on:click={setDate(complaintData.id)}
+                          >
+                            Set
+                          </button>
+                          <button
+                            class="bg-red-300 px-4 py-2 rounded-lg w-1/2"
+                            on:click={() => {
+                              setDateIndex.set(-1);
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    {/if}
+                  </td>
                   <th
                     scope="row"
                     class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
@@ -445,9 +642,15 @@
                   <td class="px-6 py-4"> {complaintData.defendantLocation} </td>
                   {#if !$showPrintModel}
                     <td class="px-6 py-4">
-                      <a href={(complaintData.evidenceURL != null ? complaintData.evidenceURL : complaintData.complaintMediaUrl)}>
+                      <a
+                        href={complaintData.evidenceURL != null
+                          ? complaintData.evidenceURL
+                          : complaintData.complaintMediaUrl}
+                      >
                         <img
-                          src={(complaintData.evidenceURL != null ? complaintData.evidenceURL : complaintData.complaintMediaUrl)}
+                          src={complaintData.evidenceURL != null
+                            ? complaintData.evidenceURL
+                            : complaintData.complaintMediaUrl}
                           alt="ID Picture"
                           class="h-10 w-10"
                         />
@@ -464,7 +667,11 @@
                         class="bg-white"
                         bind:value={complaintData.status}
                         on:change={() =>
-                          updateStatus(complaintData.id, complaintData.status, complaintData.appointmentOwner)}
+                          updateStatus(
+                            complaintData.id,
+                            complaintData.status,
+                            complaintData.appointmentOwner
+                          )}
                       >
                         <option value="Processing">On Process</option>
                         <option value="ProcBrgy">Proceed To Barangay</option>

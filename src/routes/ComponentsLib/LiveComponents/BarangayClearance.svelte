@@ -328,6 +328,26 @@
     };
     await setDoc(docRef, updatedData, { merge: true });
   };
+
+  
+  import flatpickr from "flatpickr";
+  import 'flatpickr/dist/flatpickr.css'
+  const disableWeekends = (event) => {
+    const element = event.target;
+    if(element.getAttribute("picker_set") == "yes"){
+      return
+    }
+    flatpickr(element, {
+      "disable": [
+        function(date) {
+            return (date.getDay() === 0 || date.getDay() === 6);
+        }
+    ],
+    });
+    element.setAttribute("picker_set", "yes")
+    
+    
+  };
 </script>
 
 <div
@@ -891,6 +911,7 @@
                             TYPE="date"
                             PLACEHOLDER=""
                             bind:this={bgyVarStore.dateOfAppointment}
+                            ONCLICK={disableWeekends}
                           />
                         </div>
 
