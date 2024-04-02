@@ -27,13 +27,12 @@
   }
   const submitOrdinance = async () => {
     const colRef = collection(db, "ordinancesList");
-    await addDoc(colRef, {
+    const result = await addDoc(colRef, {
       content: markdownContent,
       title: ordinanceTitle,
       createdAt: serverTimestamp(),
-    }).then(() => {
-      window.location.href = "/";
     });
+    window.location.href = `/edit?id=${result.id}`
   };
 
   let uploadedImages = writable([]);
@@ -69,7 +68,7 @@
         // toast.success('Markdown copied to clipboard!', {
         //     timeout: 3000,
         // });
-        showToast("Copied to clipboard")
+        showToast("Copied to clipboard");
       })
       .catch((error) => {
         console.error("Failed to copy Markdown to clipboard: ", error);
@@ -148,7 +147,7 @@
       <button on:click={handleFileUpload}>Upload</button>
     </div>
   </div>
-  <ToastContainer placement="bottom-right" let:data={data}>
+  <ToastContainer placement="bottom-right" let:data>
     <FlatToast {data} />
   </ToastContainer>
 </div>
