@@ -60,7 +60,7 @@
     <DashBoard />
   {:else if $navSelections === "Analytics"}
     <Analytics />
-  {:else if $navSelections === "List of registered voters"}
+  {:else if $navSelections === "List of App users"}
     <ListOfVoters />
   {:else if $navSelections === "Barangay ID"}
     <BarangayId />

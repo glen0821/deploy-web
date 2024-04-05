@@ -39,7 +39,7 @@
     },
     {
       svg: listIcon,
-      nav: "List of registered voters",
+      nav: "List of App users",
     },
 
     {
