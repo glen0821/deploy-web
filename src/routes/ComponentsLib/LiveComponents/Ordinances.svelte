@@ -68,7 +68,7 @@
             >
               {ordinance.title}
             </td>
-            <td class="px-6 py-4 w-1/2">
+            <td class="px-6 py-4" style="max-width: 400px">
               {ordinance.content}
             </td>
             <td class="px-6 py-4">

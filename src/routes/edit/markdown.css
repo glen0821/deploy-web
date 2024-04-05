@@ -71,6 +71,12 @@ textarea {
     background-color: #fafafa;
 }
 
+.preview img{
+    max-height: 300px;
+    display: block;
+    margin: 0 auto;
+}
+
 .cms-submit {
     border-radius: 10px;
     border: none;
