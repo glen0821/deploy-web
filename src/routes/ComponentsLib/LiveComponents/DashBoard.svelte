@@ -110,7 +110,7 @@
           <span>
             <i class="fi fi-rr-vote-yea"></i>
           </span>
-         <span>App users</span> 
+         <span>Total app users</span> 
         </p>
       </div>
     </div>
