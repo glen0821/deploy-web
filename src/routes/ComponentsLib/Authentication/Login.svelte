@@ -66,7 +66,7 @@
         >Log in</button>
       </div>
     </div>
-    <div class="w-1/2 bg-orange-300 flex justify-center p-2 rounded-r-lg">
+    <div class=>
       <img src={loginLogo} alt="" class="h-94" />
     </div>
   </div>
