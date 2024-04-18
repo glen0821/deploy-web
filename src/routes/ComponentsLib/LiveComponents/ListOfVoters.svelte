@@ -571,6 +571,9 @@
                   ></span>
                 </div>
               </th>
+              <th scope="col" class="px-6 py-3">
+                Age
+              </th>
               {#if !$showPrintModel}
                 <th scope="col" class="px-6 py-3">
                   Action
@@ -601,6 +604,8 @@
                 <td class="px-6 py-4">{voter.precintNumber} </td>
                 <td class="px-6 py-4">{voter.lengthOfStay} </td>
                 <td class="px-6 py-4"> {voter.completeAddress} </td>
+                <td class="px-6 py-4"> {voter.age} </td>
+
                 {#if !$showPrintModel}
                   <td class="flex">
                     <select

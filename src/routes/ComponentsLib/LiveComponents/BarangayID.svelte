@@ -263,6 +263,7 @@
         documentTitle: "hello world",
         mywindow: mywindow,
         ...dataForPrint,
+        height: cmToFeetAndInches(dataForPrint.height),
       },
     });
     console.log(printContent);
@@ -278,6 +279,13 @@
     kwiri: undefined,
     trigger: undefined,
   };
+
+  function cmToFeetAndInches(cm) {
+    const inches = cm / 2.54;
+    const feet = Math.floor(inches / 12);
+    const remainingInches = Math.round(inches % 12);
+    return `${feet}'${remainingInches}"`;
+}
 
   const sortTable = (fieldName, isAscending) => {
     let q = query(colRef, orderBy(fieldName, isAscending ? "asc" : "desc"));

@@ -1,7 +1,15 @@
 <script>
   //database callse and hooks
   import { auth, db } from "../../db/firebase";
-  import { onSnapshot, collection, doc, getDoc, getDocs, query, orderBy } from "firebase/firestore";
+  import {
+    onSnapshot,
+    collection,
+    doc,
+    getDoc,
+    getDocs,
+    query,
+    orderBy,
+  } from "firebase/firestore";
   import { onMount } from "svelte";
 
   import { fly } from "svelte/transition";
@@ -10,20 +18,16 @@
   let counter = 0;
   const colRef = collection(db, "votersList");
 
-  
-// $: counterDaTa = getTotalCountDataCollections();
+  // $: counterDaTa = getTotalCountDataCollections();
 
-//   const getTotalCountDataCollections = async () => { 
-//     const data =  await getDocs(colRef)
+  //   const getTotalCountDataCollections = async () => {
+  //     const data =  await getDocs(colRef)
 
+  //     counter = data.docs.length
 
-
-//     counter = data.docs.length
-    
-
-//   }
+  //   }
   onSnapshot(colRef, (snapshots) => {
-   let counterConvert = 0;
+    let counterConvert = 0;
     snapshots.docs.forEach((doc) => {
       // let fbStoreCount = Number(doc.data().voterCounter);
       counterConvert += 1;
@@ -53,7 +57,7 @@
     snapshots.docs.forEach((doc) => {
       // let fbStoreCount = Number(doc.data().bgyCertificateCounter);
 
-      const data = {...doc.data()}
+      const data = { ...doc.data() };
 
       counterConvert += 1;
     });
@@ -91,7 +95,7 @@
     snapshots.docs.forEach((doc) => {
       counterConvert++;
     });
-    console.log(counterConvert)
+    console.log(counterConvert);
     counter6 = counterConvert;
   });
 </script>
@@ -100,121 +104,114 @@
   <div class="w-5/6 h-32 grid grid-cols-3 grid-flow-row gap-5 mt-10">
     <!--Regitered voters-->
     <div in:fly={{ y: 300, duration: 1000 }}>
-      <div
-        class="text-xs font-bold text-black px-2 py-1 bg-orange-300 rounded-full m-2 absolute z-10"
-      >
-        {counter}
-      </div>
-      <div class="max- bg-white rounded-lg drop-shadow-sm">
-        <p class="text-3xl font-bold p-14  text-black capitalize hover:scale-105 duration-700 flex items-center gap-5">
-          <span>
+      <div class="max- bg-white rounded-lg drop-shadow-sm ">
+        <div
+          class="text-6xl font-bold p-14 text-black capitalize hover:scale-105 duration-700 flex items-center gap-5 flex justify-center"
+        >
+          <div class="flex flex-col justify-center content-center">
+            <span class="text-center">{counter}</span>
+            <span class="text-sm">Total app users</span>
+          </div>
+          <span
+          class="text-6xl">
             <i class="fi fi-rr-vote-yea"></i>
           </span>
-         <span>Total app users</span> 
-        </p>
+        </div>
       </div>
     </div>
 
     <!--TOTAL ID REQUEST-->
-
     <div in:fly={{ y: 300, duration: 1000 }}>
+      <div class="max- bg-white rounded-lg drop-shadow-sm ">
         <div
-          class="text-xs font-bold text-black px-2 py-1 bg-orange-300 rounded-full m-2 absolute z-10"
+          class="text-6xl font-bold p-14 text-black capitalize hover:scale-105 duration-700 flex items-center gap-5 flex justify-center"
         >
-          {counter2}
+          <div class="flex flex-col justify-center content-center">
+            <span class="text-center">{counter2}</span>
+            <span class="text-sm">Total I.D request </span>
         </div>
-        <div class="max- bg-white rounded-lg drop-shadow-sm">
-          <p class="text-3xl font-bold p-14  text-black capitalize hover:scale-105 duration-700">
-
-            <span>
-              <i class="fi fi-rr-id-badge"></i>
-            </span>
-            <span>
-              Total I.D request
-            </span>
-            
-          </p>
+          <span
+          class="text-6xl">
+            <i class="fi fi-rr-id-badge"></i>
+          </span>
         </div>
       </div>
+    </div>
+
+    
 
     <!--TOTAL CERTIFICATE REQUEST-->
     <div in:fly={{ y: 300, duration: 1000 }}>
+      <div class="max- bg-white rounded-lg drop-shadow-sm ">
         <div
-          class="text-xs font-bold text-black px-2 py-1 bg-orange-300 rounded-full m-2 absolute z-10"
+          class="text-6xl font-bold p-14 text-black capitalize hover:scale-105 duration-700 flex items-center gap-5 flex justify-center"
         >
-          {counter3}
+          <div class="flex flex-col justify-center content-center">
+            <span class="text-center">{counter3}</span>
+            <span class="text-sm">Total certificate </span>
         </div>
-        <div class="max- bg-white rounded-lg drop-shadow-sm">
-          <p class="text-3xl font-bold p-14  text-black capitalize hover:scale-105 duration-700">
-            <span><i class="fi fi-rr-memo"></i></span>
-            <span>
-              Total certificate
-            </span>
-          </p>
-        </div>
-      </div>
-  
-    <!--TOTAL CLEARANCE REQUEST-->
-    <div in:fly={{ y: 300, duration: 1000 }}>
-        <div
-          class="text-xs font-bold text-black px-2 py-1 bg-orange-300 rounded-full m-2 absolute z-10"
-        >
-          {counter4}
-        </div>
-        <div class="max- bg-white rounded-lg drop-shadow-sm">
-          <p class="text-3xl font-bold p-14  text-black capitalize hover:scale-105 duration-700">
-
-            <span>
-              <i class="fi fi-rr-memo"></i>
-            </span>
-            <span>
-              total clearance
-            </span>
-          </p>
-        </div>
-      </div>
-
-      <!--TOTAL INDIGENCY REQUEST-->
-    <div in:fly={{ y: 300, duration: 1000 }}>
-      <div
-        class="text-xs font-bold text-black px-2 py-1 bg-orange-300 rounded-full m-2 absolute z-10"
-      >
-        {counter6}
-      </div>
-      <div class="max- bg-white rounded-lg drop-shadow-sm">
-        <p class="text-3xl font-bold p-14  text-black capitalize hover:scale-105 duration-700">
-
-          <span>
+          <span
+          class="text-6xl">
             <i class="fi fi-rr-memo"></i>
           </span>
-          <span>
-            total Indigency
-          </span>
-        </p>
+        </div>
       </div>
     </div>
-  
+
+    <!--TOTAL CLEARANCE REQUEST-->
+    <div in:fly={{ y: 300, duration: 1000 }}>
+      <div class="max- bg-white rounded-lg drop-shadow-sm ">
+        <div
+          class="text-6xl font-bold p-14 text-black capitalize hover:scale-105 duration-700 flex items-center gap-5 flex justify-center"
+        >
+          <div class="flex flex-col justify-center content-center">
+            <span class="text-center">{counter4}</span>
+            <span class="text-sm">Total clearance </span>
+        </div>
+          <span
+          class="text-6xl">
+            <i class="fi fi-rr-memo"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+    
+
+    <!--TOTAL INDIGENCY REQUEST-->
+    <div in:fly={{ y: 300, duration: 1000 }}>
+      <div class="max- bg-white rounded-lg drop-shadow-sm ">
+        <div
+          class="text-6xl font-bold p-14 text-black capitalize hover:scale-105 duration-700 flex items-center gap-5 flex justify-center"
+        >
+          <div class="flex flex-col justify-center content-center">
+            <span class="text-center">{counter6}</span>
+            <span class="text-sm">total Indigency </span>
+        </div>
+          <span
+          class="text-6xl">
+            <i class="fi fi-rr-memo"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+    
 
     <!--TOTAL OF COMPLAINT-->
     <div in:fly={{ y: 300, duration: 1000 }}>
+      <div class="max- bg-white rounded-lg drop-shadow-sm ">
         <div
-          class="text-xs font-bold text-black px-2 py-1 bg-orange-300 rounded-full m-2 absolute z-10"
+          class="text-6xl font-bold p-14 text-black capitalize hover:scale-105 duration-700 flex items-center gap-5 flex justify-center"
         >
-          {counter5}
+          <div class="flex flex-col justify-center content-center">
+            <span class="text-center">{counter5}</span>
+            <span class="text-sm">total complaint </span>
         </div>
-        <div class="max- bg-white rounded-lg drop-shadow-sm">
-          <p class="text-3xl font-bold p-14  text-black capitalize hover:scale-105 duration-700">
-
-            <span>
-              <i class="fi fi-rr-memo-pad"></i>
-            </span>
-            <span>
-              total complaint
-            </span>
-          
-          </p>
+          <span
+          class="text-6xl">
+            <i class="fi fi-rr-memo-pad"></i>
+          </span>
         </div>
       </div>
-
+    </div>
   </div>
 </div>

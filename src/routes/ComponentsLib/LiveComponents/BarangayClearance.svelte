@@ -935,27 +935,8 @@
                     </div>
                   {/if}
                 </td>
-                {#if $showPrintModel}
                   <td class="px-6 py-4"> {barangayClearance.civilStatus} </td>
-                {/if}
-                {#if !$showPrintModel}
-                  <td class="px-6 py-4">
-                    <select
-                      class="bg-white"
-                      bind:value={barangayClearance.civilStatus}
-                      on:change={() =>
-                        updateCivil(
-                          barangayClearance.id,
-                          barangayClearance.civilStatus,
-                        )}
-                    >
-                      <option value="Single">Single</option>
-                      <option value="Married">Married</option>
-                      <option value="Widowed">Widowed</option>
-                      <option value="Divorced">Divorced</option>
-                    </select>
-                  </td>
-                {/if}
+                
                 {#if $showPrintModel}
                   <td class="px-6 py-4"> {barangayClearance.gender} </td>
                 {/if}

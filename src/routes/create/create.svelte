@@ -39,7 +39,7 @@
   const handleFileUpload = async () => {
     const fileInput = document.getElementById("file_input");
     const file = fileInput.files[0];
-    const storageRef = ref(storage, `images_ordinance/${file.name}`);
+    const storageRef = ref(storage, `${file.name}`);
     const result = await uploadBytes(storageRef, file);
     console.log(result);
     const downloadURL = await getDownloadURL(result.ref);
@@ -50,7 +50,7 @@
 
   onMount(async () => {
     const storageRef = ref(storage);
-    const imagesFolderRef = ref(storageRef, "images_ordinance");
+    const imagesFolderRef = ref(storageRef, "");
     const imageList = await listAll(imagesFolderRef);
     for (const imageRef of imageList.items) {
       const url = await getDownloadURL(imageRef);

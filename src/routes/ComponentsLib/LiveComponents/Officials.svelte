@@ -114,6 +114,7 @@
       <Inputs
         TITLE="Position"
         PLACEHOLDER="Position"
+        TYPE="off-positions"
         bind:this={OfficialDetailsStore.position}
       />
     </div>
@@ -180,7 +181,7 @@
               {official.name}
             </td>
             <td class="px-6 py-4">
-              {official.position}
+              {official.position.toUpperCase()}
             </td>
             <td>
               <button
