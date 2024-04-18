@@ -147,6 +147,7 @@
       let data = { ...doc.data(), id: doc.id };
       fbData = [data, ...fbData];
     });
+    // console.log(fbData)
     onSnapsBgyCert.set(fbData);
   });
 
@@ -258,7 +259,7 @@
     }
   };
   const headerSortAscending = {
-    firstName: false,
+    firstName: undefined,
     middleInitial: undefined,
     lastName: undefined,
     suffixName: undefined,
@@ -291,7 +292,7 @@
     headerSortAscending[key] = value;
   };
 
-  sortTable("firstName", false);
+  // sortTable("firstName", false);
 
   const updateData = async (data) => {
     const docRef = doc(colRef, data);

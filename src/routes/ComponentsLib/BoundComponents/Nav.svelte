@@ -1,4 +1,5 @@
 <script>
+  import SKOfficials from "./../LiveComponents/SKOfficials.svelte";
   import Button from "../GeneralComponents/Button.svelte";
   import NavSlider from "./NavSlider.svelte";
   import { showSlider, navSelections } from "./clickOutside";
@@ -74,8 +75,10 @@
     <Complaint />
   {:else if $navSelections === "Ordinances"}
     <Ordinances />
-    {:else if $navSelections === "Officials"}
+  {:else if $navSelections === "Officials"}
     <Officials />
+  {:else if $navSelections === "SK Officials"}
+    <SKOfficials />
   {/if}
 </div>
 

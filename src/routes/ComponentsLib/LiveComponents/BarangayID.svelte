@@ -270,7 +270,7 @@
     return true;
   }
   const headerSortAscending = {
-    firstName: false,
+    firstName: undefined,
     middleInitial: undefined,
     lastName: undefined,
     suffixName: undefined,
@@ -310,7 +310,6 @@
     headerSortAscending[key] = value;
   };
 
-  sortTable("firstName", false);
 
   const setDateIndex = writable(-1);
 

@@ -284,7 +284,7 @@
   }
 
   const headerSortAscending = {
-    firstName: false,
+    firstName: undefined,
   };
 
   const sortTable = (fieldName, isAscending) => {
@@ -309,7 +309,6 @@
     headerSortAscending[key] = value;
   };
 
-  sortTable("firstName", false);
   const updateCivil = async (userID, selectedStatus) => {
     const docRef = doc(colRef, userID);
     const updatedData = {
