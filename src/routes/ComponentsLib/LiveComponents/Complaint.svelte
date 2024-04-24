@@ -552,7 +552,6 @@
                 <th scope="col" class="px-6 py-3"> evidence </th>
               {/if}
               <th scope="col" class="px-6 py-3"> complaint </th>
-              <th scope="col" class="px-6 py-3"> location</th>
               {#if !$showPrintModel}
                 <th scope="col" class="px-6 py-3"> Action Taken </th>
                 <th scope="col" class="px-6 py-3"> Action</th>
@@ -660,7 +659,6 @@
 
                   <td class="px-6 py-4"> {complaintData.complaint} </td>
 
-                  <td class="px-6 py-4"> {complaintData.location}</td>
                   {#if !$showPrintModel}
                     <td class="px-6 py-4">
                       <select
