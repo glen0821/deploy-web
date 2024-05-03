@@ -217,7 +217,7 @@
 <div
   class="flex w-full bg-gray-100 min-h-screen content-center flex-col flex-wrap"
 >
-  <div class="w-5/6 grid grid-cols-3 grid-flow-row gap-5 mt-10">
+  <div class="w-5/6 gap-10 mt-1 flex p-4 overflow-y-auto">
     <!--Regitered voters-->
     <div in:fly={{ y: 300, duration: 1000 }}>
       <div class="max- bg-white rounded-lg drop-shadow-sm">
@@ -243,7 +243,7 @@
         >
           <div class="flex flex-col justify-center content-center">
             <span class="text-center">{counter2}</span>
-            <span class="text-sm">Total I.D request </span>
+            <span class="text-sm">Total I.D </span>
           </div>
           <span class="text-6xl">
             <i class="fi fi-rr-id-badge"></i>
@@ -356,8 +356,8 @@
       </div>
     </div>
   </div>
-  <div class="mt-10 mb-10">
-    <div class="p-10 border border-solid w-full border-blue-500 rounded-lg">
+  <div class="mt-4 mb-10 ">
+    <div class="w-full rounded-lg flex justify-center" style="height: 450px;">
       <Bar class="" data={chartData} />
     </div>
   </div>
