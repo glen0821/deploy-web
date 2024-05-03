@@ -67,12 +67,12 @@
     bind:value={BINDTHIS}
   >
     <option value="Captain">Captain</option>
-    <option value="Administrator">Administrator</option>
-    <option value="Executive Officer">Executive Officer</option>
-    <option value="Secretary">Secretary</option>
-    <option value="Treasurer">Treasurer</option>
+    <!-- <option value="Administrator">Administrator</option> -->
+    <!-- <option value="Executive Officer">Executive Officer</option> -->
+    <!-- <option value="Secretary">Secretary</option> -->
+    <!-- <option value="Treasurer">Treasurer</option> -->
     <option value="Councilor">Councilor</option>
-    <option value="Purok Leader">Purok Leader</option>
+    <!-- <option value="Purok Leader">Purok Leader</option> -->
   </select>
   {:else if TYPE === "file"}
   <p class="p-2 font-bold text-{COLOR}">{TITLE}</p>
