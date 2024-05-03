@@ -12,7 +12,6 @@
   } from "firebase/firestore";
   import { onMount } from "svelte";
   import { writable } from "svelte/store";
-
   import { fly } from "svelte/transition";
 
   //listofvoters count
@@ -103,8 +102,9 @@
   const showAnalytics = writable(false);
   const selectedAnalytics = writable("ID");
 
-  import { Line } from "svelte-chartjs";
-  import Bar from "svelte-chartjs/Bar.svelte";
+  import { Line, Bar } from "svelte-chartjs";
+  // import Bar from "svelte-chartjs/Bar.svelte";
+  // import Bar from "svelte-chartjs";
   import {
     Chart as ChartJS,
     Tooltip,
@@ -212,6 +212,7 @@
       unsubscribe();
     };
   });
+  getAnalytics(colRef3, "purpose");
 </script>
 
 <div

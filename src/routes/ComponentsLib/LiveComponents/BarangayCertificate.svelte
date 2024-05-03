@@ -820,6 +820,7 @@
                 ></span>
               </div>
             </th>
+            <th scope="col" class="px-6 py-3"> quantity </th>
             <th scope="col" class="px-6 py-3"> status </th>
             {#if !$showPrintModel}
               <th scope="col" class="px-6 py-3"> action </th>
@@ -934,9 +935,11 @@
                   </select>
                 </td>
               {/if}
+              <td class="px-6 py-4"> {cert.quantity ?? 1} </td>
               {#if $showPrintModel}
                 <td class="px-6 py-4"> {cert.status} </td>
               {/if}
+          
               {#if !$showPrintModel}
                 <td class="px-6 py-4">
                   <select
@@ -973,6 +976,7 @@
                   </div>
                 </td>
               {/if}
+
             </tr>
             {#if $showCertEditLogic && $compareCertValue == i}
               <div class="">

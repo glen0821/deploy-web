@@ -827,6 +827,7 @@
                   ></span>
                 </div>
               </th>
+              <th scope="col" class="px-6 py-3"> quantity </th>
               <th scope="col" class="px-6 py-3"> status </th>
               {#if !$showPrintModel}
                 <th scope="col" class="px-6 py-3"> action </th>
@@ -953,6 +954,7 @@
                     </select>
                   </td>
                 {/if}
+                <td class="px-6 py-4"> {barangayIndigency.quantity ?? 1} </td>
                 {#if $showPrintModel}
                   <td class="px-6 py-4">
                     {barangayIndigency.status}
