@@ -78,12 +78,11 @@
 
   //complaint count
   let counter5 = 0;
-  const colRef5 = collection(db, "complaints");
+  const colRef5 = collection(db, "Complaints");
   onSnapshot(colRef5, (snapshots) => {
     let counterConvert = 0;
     snapshots.docs.forEach((doc) => {
-      let fbStoreCount = Number(doc.data().complaintCounter);
-      counterConvert += fbStoreCount;
+      counterConvert++;
     });
     counter5 = counterConvert;
   });
