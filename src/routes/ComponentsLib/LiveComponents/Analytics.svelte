@@ -47,6 +47,7 @@
     return `${year}-${month}-${day}`;
   }
   let tabs = [
+    // { id: 0, label: "Overview" },
     { id: 1, label: "Daily" },
     { id: 2, label: "Monthly" },
     { id: 3, label: "Yearly" },
@@ -114,9 +115,9 @@
     };
     for (let j = 0; j < analytics.length; j++) {
       let data = analytics[j];
-      console.log(year, month, data.year == year, data.year)
+      console.log(year, month, data.year == year, data.year);
       if (data.year == year && data.month == parseInt(month)) {
-        dataset[data.type][data.day-1]++;
+        dataset[data.type][data.day - 1]++;
       }
     }
 
@@ -178,11 +179,11 @@
     if (activeTab.id == 1) {
       newDate = getCurrentDate();
     } else if (activeTab.id == 2) {
-      newDate = getCurrentDate().split('-');
-      newDate = `${newDate[0]}-${newDate[1]}`
+      newDate = getCurrentDate().split("-");
+      newDate = `${newDate[0]}-${newDate[1]}`;
     } else {
-      newDate = getCurrentDate().split('-');
-      newDate = `${newDate[0]}`
+      newDate = getCurrentDate().split("-");
+      newDate = `${newDate[0]}`;
     }
     selectedDate = newDate;
     const date = selectedDate.split("-");
@@ -296,6 +297,33 @@
       };
     }
   }
+
+  const overViewData = {
+  labels: [""],
+  datasets: [{
+    label: 'My First Dataset',
+    data: [65, 59, 80, 81, 56, 55, 40],
+    backgroundColor: [
+      'rgba(255, 99, 132, 0.2)',
+      'rgba(255, 159, 64, 0.2)',
+      'rgba(255, 205, 86, 0.2)',
+      'rgba(75, 192, 192, 0.2)',
+      'rgba(54, 162, 235, 0.2)',
+      'rgba(153, 102, 255, 0.2)',
+      'rgba(201, 203, 207, 0.2)'
+    ],
+    borderColor: [
+      'rgb(255, 99, 132)',
+      'rgb(255, 159, 64)',
+      'rgb(255, 205, 86)',
+      'rgb(75, 192, 192)',
+      'rgb(54, 162, 235)',
+      'rgb(153, 102, 255)',
+      'rgb(201, 203, 207)'
+    ],
+    borderWidth: 1
+  }]
+};
 </script>
 
 <div class="flex w-full bg-gray-100 min-h-screen flex-col">
@@ -315,6 +343,16 @@
   </div>
 
   <div class="mt-4">
+    {#if activeTab.id === 0}
+      <div class="w-full p-4 justify-center gap-5 grid grid-cols-2">
+        <div class="p-10 border border-solid w-full border-blue-500 rounded-lg">
+          <!-- <h2 class="font-bold text-xl text-red-700">Voters</h2> -->
+          {#if chartDataset["voter"] != undefined}
+            <Line class="ml-40 mr-10" data={chartDataset["voter"]} />
+          {/if}
+        </div>
+      </div>
+    {/if}
     {#if activeTab.id === 1}
       <div class="flex justify-center items-center">
         <p>Date:</p>

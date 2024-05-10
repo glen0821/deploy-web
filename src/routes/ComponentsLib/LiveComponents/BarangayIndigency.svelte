@@ -284,7 +284,7 @@
   }
 
   const headerSortAscending = {
-    firstName: false,
+    firstName: undefined,
   };
 
   const sortTable = (fieldName, isAscending) => {
@@ -309,7 +309,6 @@
     headerSortAscending[key] = value;
   };
 
-  sortTable("firstName", false);
   const updateCivil = async (userID, selectedStatus) => {
     const docRef = doc(colRef, userID);
     const updatedData = {
@@ -828,6 +827,7 @@
                   ></span>
                 </div>
               </th>
+              <th scope="col" class="px-6 py-3"> quantity </th>
               <th scope="col" class="px-6 py-3"> status </th>
               {#if !$showPrintModel}
                 <th scope="col" class="px-6 py-3"> action </th>
@@ -934,27 +934,7 @@
                     </div>
                   {/if}
                 </td>
-                {#if $showPrintModel}
                   <td class="px-6 py-4"> {barangayIndigency.civilStatus} </td>
-                {/if}
-                {#if !$showPrintModel}
-                  <td class="px-6 py-4">
-                    <select
-                      class="bg-white"
-                      bind:value={barangayIndigency.civilStatus}
-                      on:change={() =>
-                        updateCivil(
-                          barangayIndigency.id,
-                          barangayIndigency.civilStatus
-                        )}
-                    >
-                      <option value="Single">Single</option>
-                      <option value="Married">Married</option>
-                      <option value="Widowed">Widowed</option>
-                      <option value="Divorced">Divorced</option>
-                    </select>
-                  </td>
-                {/if}
                 {#if $showPrintModel}
                   <td class="px-6 py-4"> {barangayIndigency.gender} </td>
                 {/if}
@@ -974,6 +954,7 @@
                     </select>
                   </td>
                 {/if}
+                <td class="px-6 py-4"> {barangayIndigency.quantity ?? 1} </td>
                 {#if $showPrintModel}
                   <td class="px-6 py-4">
                     {barangayIndigency.status}

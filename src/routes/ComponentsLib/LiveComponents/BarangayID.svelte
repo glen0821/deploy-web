@@ -263,13 +263,14 @@
         documentTitle: "hello world",
         mywindow: mywindow,
         ...dataForPrint,
+        height: cmToFeetAndInches(dataForPrint.height),
       },
     });
     console.log(printContent);
     return true;
   }
   const headerSortAscending = {
-    firstName: false,
+    firstName: undefined,
     middleInitial: undefined,
     lastName: undefined,
     suffixName: undefined,
@@ -278,6 +279,13 @@
     kwiri: undefined,
     trigger: undefined,
   };
+
+  function cmToFeetAndInches(cm) {
+    const inches = cm / 2.54;
+    const feet = Math.floor(inches / 12);
+    const remainingInches = Math.round(inches % 12);
+    return `${feet}'${remainingInches}"`;
+}
 
   const sortTable = (fieldName, isAscending) => {
     let q = query(colRef, orderBy(fieldName, isAscending ? "asc" : "desc"));
@@ -302,7 +310,6 @@
     headerSortAscending[key] = value;
   };
 
-  sortTable("firstName", false);
 
   const setDateIndex = writable(-1);
 

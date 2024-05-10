@@ -21,7 +21,7 @@
 
   //database loop data
   const onSnaps = writable([]);
-  const colRef = collection(db, "officialsList");
+  const colRef = collection(db, "skofficialsList");
   let q = query(colRef, orderBy("name", "desc"));
   onSnapshot(q, (snapshots) => {
     let fbData = [];
@@ -51,7 +51,7 @@
     if(file == null){
       return null
     }
-    const storageRef = ref(storage, `images_official/${file.name}`);
+    const storageRef = ref(storage, `images_skofficial/${file.name}`);
     const result = await uploadBytes(storageRef, file);
     console.log(result);
     const downloadURL = await getDownloadURL(result.ref);
@@ -61,7 +61,7 @@
   let editID = "";
 
   const submitData = async () => {
-    const colRef = collection(db, "officialsList");
+    const colRef = collection(db, "skofficialsList");
     const profileURL = await handleFileUpload();
     const data = {
       name: OfficialDetailsStore.name.BINDTHIS,

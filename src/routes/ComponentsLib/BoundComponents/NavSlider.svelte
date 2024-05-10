@@ -74,6 +74,10 @@
       svg: complaints,
       nav: "Officials",
     },
+    {
+      svg: complaints,
+      nav: "SK Officials",
+    },
   ];
 
   //value grabber from menu

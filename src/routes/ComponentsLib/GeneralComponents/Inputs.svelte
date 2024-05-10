@@ -60,6 +60,20 @@
     <option value="Male">Male</option>
     <option value="Female">Female</option>
   </select>
+  {:else if TYPE === "off-positions"}
+  <p class="p-2 font-bold text-{COLOR}">{TITLE}</p>
+  <select
+    class="w-full h-10 bg-slate-100 p-2 focus:outline-none"
+    bind:value={BINDTHIS}
+  >
+    <option value="Captain">Captain</option>
+    <!-- <option value="Administrator">Administrator</option> -->
+    <!-- <option value="Executive Officer">Executive Officer</option> -->
+    <!-- <option value="Secretary">Secretary</option> -->
+    <!-- <option value="Treasurer">Treasurer</option> -->
+    <option value="Councilor">Councilor</option>
+    <!-- <option value="Purok Leader">Purok Leader</option> -->
+  </select>
   {:else if TYPE === "file"}
   <p class="p-2 font-bold text-{COLOR}">{TITLE}</p>
   <input

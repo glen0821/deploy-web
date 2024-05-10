@@ -256,7 +256,7 @@
           <div class="text-wrapper-2">{gender}</div>
         </div>
         <div class="text-wrapper-3">{civilStatus}</div>
-        <div class="text-wrapper-4">{weight}kg / {height}cm</div>
+        <div class="text-wrapper-4">{weight}kg / {height} in</div>
         <div class="text-wrapper-5">{emergency_name}</div>
         <div class="text-wrapper-6">{emergency_contact}</div>
         <p class="p">

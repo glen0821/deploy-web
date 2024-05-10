@@ -285,7 +285,7 @@
     return true;
   }
   const headerSortAscending = {
-    firstName: false,
+    firstName: undefined,
   };
 
   const sortTable = (fieldName, isAscending) => {
@@ -310,7 +310,7 @@
     headerSortAscending[key] = value;
   };
 
-  sortTable("firstName", false);
+  // sortTable("firstName", false);
 
   const updateCivil = async (userID, selectedStatus) => {
     const docRef = doc(colRef, userID);
@@ -829,6 +829,7 @@
                   ></span>
                 </div>
               </th>
+              <th scope="col" class="px-6 py-3"> quantity </th>
               <th scope="col" class="px-6 py-3"> status </th>
               {#if !$showPrintModel}
                 <th scope="col" class="px-6 py-3"> action </th>
@@ -935,27 +936,8 @@
                     </div>
                   {/if}
                 </td>
-                {#if $showPrintModel}
                   <td class="px-6 py-4"> {barangayClearance.civilStatus} </td>
-                {/if}
-                {#if !$showPrintModel}
-                  <td class="px-6 py-4">
-                    <select
-                      class="bg-white"
-                      bind:value={barangayClearance.civilStatus}
-                      on:change={() =>
-                        updateCivil(
-                          barangayClearance.id,
-                          barangayClearance.civilStatus,
-                        )}
-                    >
-                      <option value="Single">Single</option>
-                      <option value="Married">Married</option>
-                      <option value="Widowed">Widowed</option>
-                      <option value="Divorced">Divorced</option>
-                    </select>
-                  </td>
-                {/if}
+                
                 {#if $showPrintModel}
                   <td class="px-6 py-4"> {barangayClearance.gender} </td>
                 {/if}
@@ -975,6 +957,7 @@
                     </select>
                   </td>
                 {/if}
+                <td class="px-6 py-4"> {barangayClearance.quantity ?? 1} </td>
                 {#if $showPrintModel}
                   <td class="px-6 py-4"> {barangayClearance.status} </td>
                 {/if}
