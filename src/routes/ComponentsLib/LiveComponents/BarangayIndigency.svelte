@@ -107,7 +107,7 @@
       message = "Your indigency is being processed";
     } else if (selectedStatus == "Ready for pickup") {
       message =
-        "Your indigency is ready for pickup, get it before or on appointed date";
+        "Your indigency is ready for ready, Pick it up on your appointed date";
     } else {
       message = "Your indigency has been claimed";
     }
