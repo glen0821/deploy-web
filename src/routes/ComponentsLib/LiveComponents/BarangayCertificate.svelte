@@ -173,7 +173,7 @@
       message = "Your certificate is being processed";
     } else if (selectedStatus == "Ready for pickup") {
       message =
-        "Your certificate is ready for pickup, get it before or on appointed date";
+        "Your certificate is ready. Pick it up on your appointed date";
     } else {
       message = "Your certificate has been claimed";
     }

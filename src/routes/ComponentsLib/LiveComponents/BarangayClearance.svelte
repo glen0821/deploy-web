@@ -123,7 +123,7 @@
       message = "Your clearance is being processed";
     } else if (selectedStatus == "Ready for pickup") {
       message =
-        "Your clearance is ready for pickup, get it before or on appointed date";
+        "Your clearance is ready. Pick it up on your appointed date";
     } else {
       message = "Your clearance has been claimed";
     }
