@@ -1,26 +1,10 @@
 <script>
   //database callse and hooks
-  import { auth, db } from "../../db/firebase";
-  import Inputs from "../GeneralComponents/Inputs.svelte";
-  import {
-    onSnapshot,
-    collection,
-    doc,
-    getDoc,
-    getDocs,
-    query,
-    orderBy,
-  } from "firebase/firestore";
-  import {
-    showAdd,
-    onSnaps,
-    compareValue,
-    printing,
-  } from "../BoundComponents/clickOutside";
-  import { onMount } from "svelte";
-  import { fly } from "svelte/transition";
+  import { db } from "../../db/firebase";
+  import { onSnapshot, collection, query, orderBy } from "firebase/firestore";
+  import { onSnaps } from "../BoundComponents/clickOutside";
   import { Line } from "svelte-chartjs";
-  import { data as daily_data, dataset } from "./daily_data.js";
+  import { dataset } from "./daily_data.js";
   import {
     Chart as ChartJS,
     Tooltip,
@@ -36,9 +20,11 @@
     LinearScale,
     PointElement,
     CategoryScale,
-    Filler
+    Filler,
   );
+
   let selectedDate = getCurrentDate();
+
   function getCurrentDate() {
     const today = new Date();
     const year = today.getFullYear();
@@ -46,39 +32,44 @@
     const day = String(today.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   }
+
   let tabs = [
     // { id: 0, label: "Overview" },
     { id: 1, label: "Daily" },
     { id: 2, label: "Monthly" },
     { id: 3, label: "Yearly" },
   ];
-  let activeTab = tabs[0];
+
+  let activeTab = tabs[2];
+
   const getValue = (myWritable) => {
     let currentValue;
-    const unsubscribe = myWritable.subscribe((value) => {
+    myWritable.subscribe((value) => {
       currentValue = value;
-    });
+    })();
     return currentValue;
   };
-  const getAnalytics = async () => {
-    const colRef = collection(db, "analytics");
-    let q = query(colRef, orderBy("timestamp", "desc"));
-    onSnapshot(q, (snapshots) => {
-      let fbData = [];
-      snapshots.docs.forEach((doc) => {
-        let data = { ...doc.data(), id: doc.id };
-        fbData = [data, ...fbData];
-      });
-      onSnaps.set(fbData);
-      console.log(fbData.length);
-      const date = selectedDate.split("-");
-      const dtst = getCategorizedAnalytics(date, fbData);
-      dataset.set(dtst);
+
+  const fetchAnalyticsData = async () => {
+    const analyticsCollectionRef = collection(db, "analytics");
+    let analyticsQuery = query(
+      analyticsCollectionRef,
+      orderBy("timestamp", "desc"),
+    );
+    onSnapshot(analyticsQuery, (snapshot) => {
+      let analyticsData = snapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      onSnaps.set(analyticsData);
+      const dateParts = selectedDate.split("-");
+      const categorizedData = getCategorizedAnalytics(dateParts, analyticsData);
+      dataset.set(categorizedData);
       updateChart();
     });
   };
 
-  getAnalytics();
+  fetchAnalyticsData();
 
   const getYearAnalytics = (year, analytics) => {
     const months = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -115,7 +106,6 @@
     };
     for (let j = 0; j < analytics.length; j++) {
       let data = analytics[j];
-      console.log(year, month, data.year == year, data.year);
       if (data.year == year && data.month == parseInt(month)) {
         dataset[data.type][data.day - 1]++;
       }
@@ -125,32 +115,17 @@
   };
 
   const getDayAnalytics = (year, month, day, analytics) => {
+    const hours = Array(24).fill(0);
     const dataset = {
-      certificate: [
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      ],
-      clearance: [
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      ],
-      indigency: [
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      ],
-      complaint: [
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      ],
-      voter: [
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      ],
-      id: [
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      ],
+      certificate: [...hours],
+      clearance: [...hours],
+      indigency: [...hours],
+      complaint: [...hours],
+      voter: [...hours],
+      id: [...hours],
     };
-    const hours = [
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    ];
     for (let j = 0; j < analytics.length; j++) {
       let data = analytics[j];
-
       if (
         data.year == year &&
         data.month == parseInt(month) &&
@@ -175,16 +150,15 @@
   }
 
   function handleTabChange() {
-    let newDate;
+    const currentDateParts = getCurrentDate().split("-");
+    let newDate = currentDateParts[0]; // Default to year
+
     if (activeTab.id == 1) {
-      newDate = getCurrentDate();
+      newDate = currentDateParts.join("-");
     } else if (activeTab.id == 2) {
-      newDate = getCurrentDate().split("-");
-      newDate = `${newDate[0]}-${newDate[1]}`;
-    } else {
-      newDate = getCurrentDate().split("-");
-      newDate = `${newDate[0]}`;
+      newDate = `${currentDateParts[0]}-${currentDateParts[1]}`;
     }
+
     selectedDate = newDate;
     const date = selectedDate.split("-");
     let analytics;
@@ -197,19 +171,19 @@
   }
 
   const getCategorizedAnalytics = (date, analytics) => {
-    if (activeTab.id == 1) {
-      return getDayAnalytics(date[0], date[1], date[2], analytics);
-    } else if (activeTab.id == 2) {
-      return getMonthAnalytics(date[0], date[1], analytics);
-    } else {
-      return getYearAnalytics(date[0], analytics);
+    switch (activeTab.id) {
+      case 1:
+        return getDayAnalytics(date[0], date[1], date[2], analytics);
+      case 2:
+        return getMonthAnalytics(date[0], date[1], analytics);
+      default:
+        return getYearAnalytics(date[0], analytics);
     }
   };
 
   let chartDataset = {};
 
   function updateChart() {
-    // Update the data prop with the new daily_points value
     const categories = [
       "certificate",
       "voter",
@@ -218,59 +192,67 @@
       "complaint",
       "id",
     ];
-    for (let i = 0; i < categories.length; i++) {
-      let labels = [];
-      if (activeTab.id == 1) {
-        labels = [
-          "1:00",
-          "02:00",
-          "03:00",
-          "04:00",
-          "05:00",
-          "06:00",
-          "07:00",
-          "08:00",
-          "09:00",
-          "10:00",
-          "11:00",
-          "12:00",
-          "13:00",
-          "14:00",
-          "15:00",
-          "16:00",
-          "17:00",
-          "18:00",
-          "19:00",
-          "20:00",
-          "21:00",
-          "22:00",
-          "23:00",
-          "24:00",
-        ];
-      } else if (activeTab.id == 2) {
-        const date = selectedDate.split("-");
-        const daysInMonth = new Date(date[0], date[1], 0).getDate();
-        for (let j = 0; j < daysInMonth; j++) {
-          labels.push((j + 1).toString());
-        }
-      } else {
-        labels = [
-          "January",
-          "February",
-          "March",
-          "April",
-          "May",
-          "June",
-          "July",
-          "August",
-          "September",
-          "October",
-          "November",
-          "December",
-        ];
+
+    const getLabels = () => {
+      switch (activeTab.id) {
+        case 1:
+          return [
+            "1:00",
+            "02:00",
+            "03:00",
+            "04:00",
+            "05:00",
+            "06:00",
+            "07:00",
+            "08:00",
+            "09:00",
+            "10:00",
+            "11:00",
+            "12:00",
+            "13:00",
+            "14:00",
+            "15:00",
+            "16:00",
+            "17:00",
+            "18:00",
+            "19:00",
+            "20:00",
+            "21:00",
+            "22:00",
+            "23:00",
+            "24:00",
+          ];
+        case 2:
+          const date = selectedDate.split("-");
+          const daysInMonth = new Date(date[0], date[1], 0).getDate();
+          return Array.from({ length: daysInMonth }, (_, i) =>
+            (i + 1).toString(),
+          );
+        case 3:
+          return [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+          ];
+        default:
+          return [];
       }
-      chartDataset[categories[i]] = {
-        labels: labels,
+    };
+
+    const labels = getLabels();
+
+    categories.forEach((category) => {
+      chartDataset[category] = {
+        labels,
         datasets: [
           {
             label: "",
@@ -282,7 +264,7 @@
             borderDash: [],
             borderDashOffset: 0.0,
             borderJoinStyle: "miter",
-            pointBorderColor: "rgb(205, 130,1 58)",
+            pointBorderColor: "rgb(205, 130, 158)",
             pointBackgroundColor: "rgb(255, 255, 255)",
             pointBorderWidth: 2,
             pointHoverRadius: 5,
@@ -291,39 +273,12 @@
             pointHoverBorderWidth: 2,
             pointRadius: 4,
             pointHitRadius: 1,
-            data: getValue(dataset)[categories[i]],
+            data: getValue(dataset)[category],
           },
         ],
       };
-    }
+    });
   }
-
-  const overViewData = {
-  labels: [""],
-  datasets: [{
-    label: 'My First Dataset',
-    data: [65, 59, 80, 81, 56, 55, 40],
-    backgroundColor: [
-      'rgba(255, 99, 132, 0.2)',
-      'rgba(255, 159, 64, 0.2)',
-      'rgba(255, 205, 86, 0.2)',
-      'rgba(75, 192, 192, 0.2)',
-      'rgba(54, 162, 235, 0.2)',
-      'rgba(153, 102, 255, 0.2)',
-      'rgba(201, 203, 207, 0.2)'
-    ],
-    borderColor: [
-      'rgb(255, 99, 132)',
-      'rgb(255, 159, 64)',
-      'rgb(255, 205, 86)',
-      'rgb(75, 192, 192)',
-      'rgb(54, 162, 235)',
-      'rgb(153, 102, 255)',
-      'rgb(201, 203, 207)'
-    ],
-    borderWidth: 1
-  }]
-};
 </script>
 
 <div class="flex w-full bg-gray-100 min-h-screen flex-col">
@@ -336,6 +291,12 @@
           activeTab = tab;
           handleTabChange();
         }}
+        on:keydown={(event) => {
+          if (event.key === "Enter") {
+            activeTab = tab;
+            handleTabChange();
+          }
+        }}
       >
         {tab.label}
       </div>
@@ -343,16 +304,6 @@
   </div>
 
   <div class="mt-4">
-    {#if activeTab.id === 0}
-      <div class="w-full p-4 justify-center gap-5 grid grid-cols-2">
-        <div class="p-10 border border-solid w-full border-blue-500 rounded-lg">
-          <!-- <h2 class="font-bold text-xl text-red-700">Voters</h2> -->
-          {#if chartDataset["voter"] != undefined}
-            <Line class="ml-40 mr-10" data={chartDataset["voter"]} />
-          {/if}
-        </div>
-      </div>
-    {/if}
     {#if activeTab.id === 1}
       <div class="flex justify-center items-center">
         <p>Date:</p>
@@ -364,42 +315,14 @@
         />
       </div>
       <div class="w-full p-4 justify-center gap-5 grid grid-cols-2">
-        <div class="p-10 border border-solid w-full border-blue-500 rounded-lg">
-          <h2 class="font-bold text-xl text-red-700">Voters</h2>
-          {#if chartDataset["voter"] != undefined}
-            <Line class="ml-40 mr-10" data={chartDataset["voter"]} />
-          {/if}
-        </div>
-        <div class="p-10 border border-solid w-full border-blue-500 rounded-lg">
-          <h2 class="font-bold text-xl text-red-700">Barangay ID</h2>
-          {#if chartDataset["id"] != undefined}
-            <Line class="ml-40 mr-10" data={chartDataset["id"]} />
-          {/if}
-        </div>
-        <div class="p-10 border border-solid w-full border-blue-500 rounded-lg">
-          <h2 class="font-bold text-xl text-red-700">Certificate</h2>
-          {#if chartDataset["certificate"] != undefined}
-            <Line class="ml-40 mr-10" data={chartDataset["certificate"]} />
-          {/if}
-        </div>
-        <div class="p-10 border border-solid w-full border-blue-500 rounded-lg">
-          <h2 class="font-bold text-xl text-red-700">Clearance</h2>
-          {#if chartDataset["clearance"] != undefined}
-            <Line class="ml-40 mr-10" data={chartDataset["clearance"]} />
-          {/if}
-        </div>
-        <div class="p-10 border border-solid w-full border-blue-500 rounded-lg">
-          <h2 class="font-bold text-xl text-red-700">Indigency</h2>
-          {#if chartDataset["indigency"] != undefined}
-            <Line class="ml-40 mr-10" data={chartDataset["indigency"]} />
-          {/if}
-        </div>
-        <div class="p-10 border border-solid w-full border-blue-500 rounded-lg">
-          <h2 class="font-bold text-xl text-red-700">Complaint</h2>
-          {#if chartDataset["complaint"] != undefined}
-            <Line class="ml-40 mr-10" data={chartDataset["complaint"]} />
-          {/if}
-        </div>
+        {#each ["voter", "id", "certificate", "clearance", "indigency", "complaint"] as category}
+          <div class="p-10 border border-solid w-full border-blue-500 rounded-lg">
+            <h2 class="font-bold text-xl text-red-700">{category.charAt(0).toUpperCase() + category.slice(1)}</h2>
+            {#if chartDataset[category] != undefined}
+              <Line class="ml-40 mr-10" data={chartDataset[category]} />
+            {/if}
+          </div>
+        {/each}
       </div>
     {/if}
     {#if activeTab.id === 2}
@@ -413,42 +336,14 @@
         />
       </div>
       <div class="w-full p-4 justify-center gap-5 grid grid-cols-2">
-        <div class="p-10 border border-solid w-full border-blue-500 rounded-lg">
-          <h2 class="font-bold text-xl text-red-700">Voters</h2>
-          {#if chartDataset["voter"] != undefined}
-            <Line class="ml-40 mr-10" data={chartDataset["voter"]} />
-          {/if}
-        </div>
-        <div class="p-10 border border-solid w-full border-blue-500 rounded-lg">
-          <h2 class="font-bold text-xl text-red-700">Barangay ID</h2>
-          {#if chartDataset["id"] != undefined}
-            <Line class="ml-40 mr-10" data={chartDataset["id"]} />
-          {/if}
-        </div>
-        <div class="p-10 border border-solid w-full border-blue-500 rounded-lg">
-          <h2 class="font-bold text-xl text-red-700">Certificate</h2>
-          {#if chartDataset["certificate"] != undefined}
-            <Line class="ml-40 mr-10" data={chartDataset["certificate"]} />
-          {/if}
-        </div>
-        <div class="p-10 border border-solid w-full border-blue-500 rounded-lg">
-          <h2 class="font-bold text-xl text-red-700">Clearance</h2>
-          {#if chartDataset["clearance"] != undefined}
-            <Line class="ml-40 mr-10" data={chartDataset["clearance"]} />
-          {/if}
-        </div>
-        <div class="p-10 border border-solid w-full border-blue-500 rounded-lg">
-          <h2 class="font-bold text-xl text-red-700">Indigency</h2>
-          {#if chartDataset["indigency"] != undefined}
-            <Line class="ml-40 mr-10" data={chartDataset["indigency"]} />
-          {/if}
-        </div>
-        <div class="p-10 border border-solid w-full border-blue-500 rounded-lg">
-          <h2 class="font-bold text-xl text-red-700">Complaint</h2>
-          {#if chartDataset["complaint"] != undefined}
-            <Line class="ml-40 mr-10" data={chartDataset["complaint"]} />
-          {/if}
-        </div>
+        {#each ["voter", "id", "certificate", "clearance", "indigency", "complaint"] as category}
+          <div class="p-10 border border-solid w-full border-blue-500 rounded-lg">
+            <h2 class="font-bold text-xl text-red-700">{category.charAt(0).toUpperCase() + category.slice(1)}</h2>
+            {#if chartDataset[category] != undefined}
+              <Line class="ml-40 mr-10" data={chartDataset[category]} />
+            {/if}
+          </div>
+        {/each}
       </div>
     {/if}
     {#if activeTab.id === 3}
@@ -467,42 +362,14 @@
         />
       </div>
       <div class="w-full p-4 justify-center gap-5 grid grid-cols-2">
-        <div class="p-10 border border-solid w-full border-blue-500 rounded-lg">
-          <h2 class="font-bold text-xl text-red-700">Voters</h2>
-          {#if chartDataset["voter"] != undefined}
-            <Line class="ml-40 mr-10" data={chartDataset["voter"]} />
-          {/if}
-        </div>
-        <div class="p-10 border border-solid w-full border-blue-500 rounded-lg">
-          <h2 class="font-bold text-xl text-red-700">Barangay ID</h2>
-          {#if chartDataset["id"] != undefined}
-            <Line class="ml-40 mr-10" data={chartDataset["id"]} />
-          {/if}
-        </div>
-        <div class="p-10 border border-solid w-full border-blue-500 rounded-lg">
-          <h2 class="font-bold text-xl text-red-700">Certificate</h2>
-          {#if chartDataset["certificate"] != undefined}
-            <Line class="ml-40 mr-10" data={chartDataset["certificate"]} />
-          {/if}
-        </div>
-        <div class="p-10 border border-solid w-full border-blue-500 rounded-lg">
-          <h2 class="font-bold text-xl text-red-700">Clearance</h2>
-          {#if chartDataset["clearance"] != undefined}
-            <Line class="ml-40 mr-10" data={chartDataset["clearance"]} />
-          {/if}
-        </div>
-        <div class="p-10 border border-solid w-full border-blue-500 rounded-lg">
-          <h2 class="font-bold text-xl text-red-700">Indigency</h2>
-          {#if chartDataset["indigency"] != undefined}
-            <Line class="ml-40 mr-10" data={chartDataset["indigency"]} />
-          {/if}
-        </div>
-        <div class="p-10 border border-solid w-full border-blue-500 rounded-lg">
-          <h2 class="font-bold text-xl text-red-700">Complaint</h2>
-          {#if chartDataset["complaint"] != undefined}
-            <Line class="ml-40 mr-10" data={chartDataset["complaint"]} />
-          {/if}
-        </div>
+        {#each ["voter", "id", "certificate", "clearance", "indigency", "complaint"] as category}
+          <div class="p-10 border border-solid w-full border-blue-500 rounded-lg">
+            <h2 class="font-bold text-xl text-red-700">{category.charAt(0).toUpperCase() + category.slice(1).replace(/_/g, ' ')}</h2>
+            {#if chartDataset[category] != undefined}
+              <Line class="ml-40 mr-10" data={chartDataset[category]} />
+            {/if}
+          </div>
+        {/each}
       </div>
     {/if}
   </div>

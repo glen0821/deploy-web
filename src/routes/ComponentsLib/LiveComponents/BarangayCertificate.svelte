@@ -1,24 +1,15 @@
 <script>
   import Button from "../GeneralComponents/Button.svelte";
   import Inputs from "../GeneralComponents/Inputs.svelte";
-  import PdfTemplate from "./PdfTemplate.svelte";
-  import { fly } from "svelte/transition";
-  import html2pdf from "html2pdf.js";
   import {
-    cordionLogic,
     onSnapsBgyCert,
     showCertEditLogic,
     showCertAddModal,
     compareCertValue,
-    showEditModalLogic,
     printing,
   } from "../BoundComponents/clickOutside";
-
-  import { showPrintModel, formattedDate } from "./stateStore";
-  import bgyCle from "../Images/bgyClearance.jpg";
-
-  //database calls and hooks
-  import { auth, db } from "../../db/firebase";
+  import { showPrintModel } from "./stateStore";
+  import {db } from "../../db/firebase";
   import {
     onSnapshot,
     addDoc,
@@ -33,25 +24,15 @@
     where,
   } from "firebase/firestore";
   import { onMount } from "svelte";
-  // import PrintContent from "./PrintContent.svelte";
   import CertificateContent from "./CertificateContent.svelte";
   import reportHeader from "./images/header_report.png";
   import { writable } from "svelte/store";
- 
-
-  // $: console.log(html2pdf);
-
-  const opt = {
-    margin: 1,
-    filename: "myfile.pdf",
-    image: { type: "jpeg", quality: 1.0 },
-    html2canvas: { scale: 2 },
-    jsPDF: { unit: "in", format: "legal", orientation: "portrait" },
-  };
 
   let pdfElement,
     pdfElementHidden = true,
     printData = {};
+
+  const colRef = collection(db, "barangayCertificate");
 
   onMount(() => {
     pdfElement = document.getElementById("pdf-template");
@@ -61,52 +42,40 @@
     const mywindow = window.open(
       "",
       "PRINT",
-      "height=891,width=649, initial-scale=1.0"
+      "height=891,width=649, initial-scale=1.0",
     );
 
     if (!mywindow) {
       console.error("Popup blocked. Please allow popups for this site.");
       return false;
     }
-    const printContent = new CertificateContent({
+
+    new CertificateContent({
       target: mywindow.document.body,
       props: {
-        documentTitle: "hello world",
-        mywindow: mywindow,
+        documentTitle: "Barangay Certificate",
         ...dataForPrint,
       },
     });
-    console.log(printContent);
+
     return true;
   }
 
   function fixDateFormat(originalDate) {
-    // Split the date string into year, month, and day
     var parts = originalDate.split("-");
-
-    // Pad the month part with leading zero if it's a single digit
-    parts[1] = parts[1].length === 1 ? "0" + parts[1] : parts[1];
-
-    // Pad the day part with leading zero if it's a single digit
-    parts[2] = parts[2].length === 1 ? "0" + parts[2] : parts[2];
-
-    // Reconstruct the date string with the corrected format
-    var fixedDate = parts.join("-");
-
-    return fixedDate;
+    parts[1] = parts[1].padStart(2, "0");
+    parts[2] = parts[2].padStart(2, "0");
+    return parts.join("-");
   }
 
-  //handler to show add modal
   const toShowAddModal = () => {
     showCertAddModal.set(true);
   };
 
-  //handler to show edit modal
   const toShowEditModal = () => {
     showCertEditLogic.set(true);
   };
 
-  //barangayID varStore
   const bgyVarStore = {
     firstName: "",
     lastName: "",
@@ -138,18 +107,17 @@
     });
   };
 
-  //fetch data from database
-  const colRef = collection(db, "barangayCertificate");
-  const q = query(colRef, orderBy("createdAt", "desc"));
-  onSnapshot(q, (snapshots) => {
-    let fbData = [];
-    snapshots.docs.forEach((doc) => {
-      let data = { ...doc.data(), id: doc.id };
-      fbData = [data, ...fbData];
+  const fetchData = () => {
+    const q = query(colRef, orderBy("createdAt", "desc"));
+    onSnapshot(q, (snapshots) => {
+      const fbData = snapshots.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      onSnapsBgyCert.set(fbData);
     });
-    // console.log(fbData)
-    onSnapsBgyCert.set(fbData);
-  });
+  };
+  fetchData();
 
   //removeData from database
   const removeData = async (data) => {
@@ -183,17 +151,9 @@
       userID: ownerID,
       timestamp: currentDate,
     };
-    console.log(notificationData);
     await setDoc(notifDocRef, notificationData);
   };
-  const updateCivil = async (userID, selectedStatus) => {
-    const docRef = doc(colRef, userID);
-    const updatedData = {
-      civilStatus: selectedStatus,
-      lastUpdated: serverTimestamp(),
-    };
-    await setDoc(docRef, updatedData, { merge: true });
-  };
+
   const updateGender = async (userID, selectedStatus) => {
     const docRef = doc(colRef, userID);
     const updatedData = {
@@ -202,8 +162,6 @@
     };
     await setDoc(docRef, updatedData, { merge: true });
   };
-
-  let editData = {};
 
   //showModalComparison
   const editValueHandler = (data, index) => {
@@ -218,46 +176,40 @@
       bgyVarStore.lengthOfStay.BINDTHIS = data.lengthOfStay;
       bgyVarStore.purpose.BINDTHIS = data.purpose;
       bgyVarStore.dateOfAppointment.BINDTHIS = fixDateFormat(
-        data.dateOfAppointment
+        data.dateOfAppointment,
       );
     }, 100);
   };
 
   const handlerSearch = () => {
-    if (bgyVarStore.trigger) {
-      const q = query(
-        colRef,
-        orderBy("createdAt", "desc"),
-        where("completeName", "==", bgyVarStore.kwiri)
-      );
-      onSnapshot(q, (snapshots) => {
-        let fbData = [];
-        snapshots.docs.forEach((doc) => {
-          let data = { ...doc.data(), id: doc.id };
-          fbData = [data, ...fbData];
-        });
-        onSnapsBgyCert.set(fbData);
-      });
-      bgyVarStore.trigger = false;
-    }
+    if (!bgyVarStore.trigger) return;
+
+    const q = query(
+      colRef,
+      orderBy("createdAt", "desc"),
+      where("completeName", "==", bgyVarStore.kwiri),
+    );
+    onSnapshot(q, (snapshots) => {
+      const fbData = snapshots.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      onSnapsBgyCert.set(fbData);
+    });
+    bgyVarStore.trigger = false;
   };
 
   const detectInputs = () => {
-    if (bgyVarStore.kwiri.trim().length < 1) {
+    bgyVarStore.trigger = bgyVarStore.kwiri.trim().length >= 1;
+    if (!bgyVarStore.trigger) {
       const q = query(colRef, orderBy("createdAt", "desc"));
       onSnapshot(q, (snapshots) => {
-        let fbData = [];
-        snapshots.docs.forEach((doc) => {
-          let data = { ...doc.data(), id: doc.id };
-          fbData = [data, ...fbData];
-        });
+        const fbData = snapshots.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         onSnapsBgyCert.set(fbData);
       });
-      bgyVarStore.trigger = false;
-    } else {
-      bgyVarStore.trigger = true;
     }
   };
+  
   const headerSortAscending = {
     firstName: undefined,
     middleInitial: undefined,
@@ -271,15 +223,11 @@
   };
 
   const sortTable = (fieldName, isAscending) => {
-    let q = query(colRef, orderBy(fieldName, isAscending ? "asc" : "desc"));
+    const orderDirection = isAscending ? "asc" : "desc";
+    const q = query(colRef, orderBy(fieldName, orderDirection));
     onSnapshot(q, (snapshots) => {
-      let fbData = [];
-      snapshots.docs.forEach((doc) => {
-        let data = { ...doc.data(), id: doc.id };
-        fbData = [data, ...fbData];
-      });
+      const fbData = snapshots.docs.map(doc => ({ ...doc.data(), id: doc.id }));
       onSnapsBgyCert.set(fbData);
-      console.log(fbData);
       bgyVarStore.trigger = false;
     });
   };
@@ -309,7 +257,7 @@
         purpose: bgyVarStore.purpose.BINDTHIS,
         dateOfAppointment: bgyVarStore.dateOfAppointment.BINDTHIS,
       },
-      { merge: true }
+      { merge: true },
     );
     $showCertEditLogic = false;
   };
@@ -319,7 +267,7 @@
     setDateIndex.set(index);
     setTimeout(function () {
       bgyVarStore.dateOfAppointment.BINDTHIS = fixDateFormat(
-        data.dateOfAppointment
+        data.dateOfAppointment,
       );
     }, 500);
   };
@@ -332,37 +280,29 @@
         lastUpdated: serverTimestamp(),
         dateOfAppointment: bgyVarStore.dateOfAppointment.BINDTHIS,
       },
-      { merge: true }
+      { merge: true },
     );
     setDateIndex.set(-1);
   };
 
   import flatpickr from "flatpickr";
-  import 'flatpickr/dist/flatpickr.css'
+  import "flatpickr/dist/flatpickr.css";
   const disableWeekends = (event) => {
     const element = event.target;
-    if(element.getAttribute("picker_set") == "yes"){
-      return
+    if (element.getAttribute("picker_set") == "yes") {
+      return;
     }
     flatpickr(element, {
-      "disable": [
-        function(date) {
-            return (date.getDay() === 0 || date.getDay() === 6);
-        }
-    ],
+      disable: [
+        function (date) {
+          return date.getDay() === 0 || date.getDay() === 6;
+        },
+      ],
     });
-    element.setAttribute("picker_set", "yes")
-    
-    
+    element.setAttribute("picker_set", "yes");
   };
 </script>
 
-<PdfTemplate
-  printFunc={printPdf}
-  isHidden={pdfElementHidden}
-  {...printData}
-  }
-/>
 
 <div
   class="m-2 mx-auto text-xs"
@@ -648,7 +588,7 @@
                 }
                 resetSort(
                   "completeAddress",
-                  headerSortAscending.completeAddress
+                  headerSortAscending.completeAddress,
                 );
                 sortTable("address", headerSortAscending.completeAddress);
               }}
@@ -740,11 +680,11 @@
                 }
                 resetSort(
                   "dateOfAppointment",
-                  headerSortAscending.dateOfAppointment
+                  headerSortAscending.dateOfAppointment,
                 );
                 sortTable(
                   "dateOfAppointment",
-                  headerSortAscending.dateOfAppointment
+                  headerSortAscending.dateOfAppointment,
                 );
               }}
             >
@@ -919,7 +859,7 @@
                   </div>
                 {/if}
               </td>
-                <td class="px-6 py-4"> {cert.civilStatus} </td>
+              <td class="px-6 py-4"> {cert.civilStatus} </td>
               {#if $showPrintModel}
                 <td class="px-6 py-4"> {cert.gender} </td>
               {/if}
@@ -939,7 +879,7 @@
               {#if $showPrintModel}
                 <td class="px-6 py-4"> {cert.status} </td>
               {/if}
-          
+
               {#if !$showPrintModel}
                 <td class="px-6 py-4">
                   <select
@@ -976,7 +916,6 @@
                   </div>
                 </td>
               {/if}
-
             </tr>
             {#if $showCertEditLogic && $compareCertValue == i}
               <div class="">
@@ -1060,7 +999,6 @@
                     <button
                       class="bg-red-300 px-4 py-2 rounded-lg w-1/2"
                       on:click={() => {
-                        console.log("asdfasdf");
                         $showCertEditLogic = false;
                       }}
                     >

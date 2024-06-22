@@ -1,21 +1,16 @@
 <script>
   import { writable } from "svelte/store";
-  import { auth, db, storage } from "../../db/firebase";
+  import {db, storage } from "../../db/firebase";
   import Button from "../GeneralComponents/Button.svelte";
 
   import {
     addDoc,
     collection,
-    serverTimestamp,
     onSnapshot,
     query,
     orderBy,
-    increment,
     deleteDoc,
     doc,
-    setDoc,
-    where,
-    Timestamp,
     updateDoc,
   } from "firebase/firestore";
 
@@ -167,7 +162,6 @@
         {#each $onSnaps as official, i}
           <tr class="bg-white border-b">
             <td
-              scope="row"
               class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
             >
               <img
