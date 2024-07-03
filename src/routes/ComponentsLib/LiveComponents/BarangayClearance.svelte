@@ -10,6 +10,7 @@
     printing,
   } from "../BoundComponents/clickOutside";
   import { showPrintModel } from "./stateStore";
+  import { showPrintModel } from "./stateStore";
 
   import bgyClearance from "../Images/bgyClearance.jpg";
   import PrintContent from "./PrintContent.svelte";
