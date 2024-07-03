@@ -28,9 +28,7 @@
   import reportHeader from "./images/header_report.png";
   import { writable } from "svelte/store";
 
-  let pdfElement,
-    pdfElementHidden = true,
-    printData = {};
+  let pdfElement
 
   const colRef = collection(db, "barangayCertificate");
 
@@ -136,20 +134,17 @@
     await setDoc(docRef, updatedData, { merge: true });
 
     const notifDocRef = doc(collection(db, "notifications"));
-    let message;
-    if (selectedStatus == "Processing") {
-      message = "Your certificate is being processed";
-    } else if (selectedStatus == "Ready for pickup") {
-      message =
-        "Your certificate is ready for pickup, get it before or on appointed date";
-    } else {
-      message = "Your certificate has been claimed";
-    }
-    var currentDate = Date.now();
+    const messages = {
+      "Processing": "Your certificate is being processed",
+      "Ready for pickup": "Your certificate is ready for pickup, get it before or on appointed date",
+      "Claimed": "Your certificate has been claimed"
+    };
+    const message = messages[selectedStatus] || "Status updated";
+
     const notificationData = {
       message: message,
       userID: ownerID,
-      timestamp: currentDate,
+      timestamp: Date.now(),
     };
     await setDoc(notifDocRef, notificationData);
   };
@@ -182,21 +177,27 @@
   };
 
   const handlerSearch = () => {
-    if (!bgyVarStore.trigger) return;
+    if (bgyVarStore.trigger) {
+      console.log(bgyVarStore.kwiri);
+      const q = query(colRef, orderBy("createdAt", "desc"));
 
-    const q = query(
-      colRef,
-      orderBy("createdAt", "desc"),
-      where("completeName", "==", bgyVarStore.kwiri),
-    );
-    onSnapshot(q, (snapshots) => {
-      const fbData = snapshots.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      }));
-      onSnapsBgyCert.set(fbData);
-    });
-    bgyVarStore.trigger = false;
+      onSnapshot(q, (snapshots) => {
+        const fbData = snapshots.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        }));
+
+        const filteredData = fbData.filter((data) => {
+          return Object.values(data).some((value) =>
+            value.toString().toLowerCase().includes(bgyVarStore.kwiri.toLowerCase())
+          );
+        });
+
+        onSnapsBgyCert.set(filteredData);
+      });
+
+      bgyVarStore.trigger = false;
+    }
   };
 
   const detectInputs = () => {
