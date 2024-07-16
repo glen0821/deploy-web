@@ -17,7 +17,7 @@
   } from "chart.js";
 
   const counters = writable({
-    counter: 0,
+    counter1: 0,
     counter2: 0,
     counter3: 0,
     counter4: 0,
@@ -147,7 +147,7 @@
           class="text-6xl font-bold p-14 text-black capitalize hover:scale-105 duration-700 flex items-center gap-5 flex justify-center"
         >
           <div class="flex flex-col justify-center content-center">
-            <span class="text-center">{$counters.counter}</span>
+            <span class="text-center">{$counters.counter1}</span>
             <span class="text-sm">Total app users</span>
           </div>
           <span class="text-6xl">
