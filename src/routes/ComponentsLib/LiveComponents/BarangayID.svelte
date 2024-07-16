@@ -26,7 +26,6 @@
   import reportHeader from "./images/header_report.png";
   import { onSnaps } from "../BoundComponents/clickOutside";
   import { writable } from "svelte/store";
-  
 
   //barangayID varStore
   const bgyVarStore = {
@@ -46,8 +45,6 @@
     trigger: false,
   };
 
-  
-
   //fetch data from database
   const colRef = collection(db, "barangayID");
   const q = query(colRef, orderBy("createdAt", "desc"));
@@ -55,7 +52,7 @@
     let fbData = [];
     snapshots.docs.forEach((doc) => {
       let data = { ...doc.data(), id: doc.id };
-     
+
       fbData = [data, ...fbData];
     });
     onSnapsBgyID.set(fbData);
@@ -103,9 +100,7 @@
     if (element.getAttribute("picker_set") === "yes") return;
 
     flatpickr(element, {
-      disable: [
-        (date) => date.getDay() === 0 || date.getDay() === 6,
-      ],
+      disable: [(date) => date.getDay() === 0 || date.getDay() === 6],
     });
     element.setAttribute("picker_set", "yes");
   };
@@ -179,7 +174,10 @@
 
         const filteredData = fbData.filter((data) => {
           return Object.values(data).some((value) =>
-            value.toString().toLowerCase().includes(bgyVarStore.kwiri.toLowerCase())
+            value
+              .toString()
+              .toLowerCase()
+              .includes(bgyVarStore.kwiri.toLowerCase()),
           );
         });
 
@@ -250,28 +248,41 @@
   }
 
   const sortTable = (fieldName, isAscending) => {
-    console.log(fieldName)
+    console.log(fieldName);
     const q = query(colRef, orderBy(fieldName, isAscending ? "asc" : "desc"));
-    console.log(q)
+    console.log(q);
     onSnapshot(q, async (snapshots) => {
-      console.log(snapshots.docs)
+      console.log(snapshots.docs);
       const fbData = snapshots.docs.map(async (doc) => {
         const data = doc.data();
         const updatedData = {
           ...data,
           id: doc.id,
-          height: typeof data.height === 'string' ? parseFloat(data.height) : data.height,
-          weight: typeof data.weight === 'string' ? parseFloat(data.weight) : data.weight,
+          height:
+            typeof data.height === "string"
+              ? parseFloat(data.height)
+              : data.height,
+          weight:
+            typeof data.weight === "string"
+              ? parseFloat(data.weight)
+              : data.weight,
         };
         console.log(typeof data.height);
 
         // Update the database if height or weight were strings
-        if (typeof data.height === 'string' || typeof data.weight === 'string') {
+        if (
+          typeof data.height === "string" ||
+          typeof data.weight === "string"
+        ) {
           console.log(updatedData);
-          await setDoc(doc.ref, {
-            height: updatedData.height,
-            weight: updatedData.weight,
-          }, { merge: true });
+          await setDoc(
+            doc.ref,
+            {
+              height: updatedData.height,
+              weight: updatedData.weight,
+            },
+            { merge: true },
+          );
         }
 
         return updatedData;
@@ -324,8 +335,6 @@
   <div class="min-h-[50vh] p-10">
     <div class=" flex gap-2 items-center mb-2">
       <div class="w-full flex gap-2">
-        
-
         <div class="">
           <Button
             TITLE="Print report"
@@ -352,7 +361,10 @@
     {#if $showPrintModel}
       <div class="fixed inset-0 bg-white">
         <div class="mx-auto max-w-[1000px] mt-[20vh] p-10">
-          <div class="fixed bottom-0 right-0 p-10" style="bottom: -10px !important;">
+          <div
+            class="fixed bottom-0 right-0 p-10"
+            style="bottom: -10px !important;"
+          >
             <div class="flex gap-2">
               {#if !$printing}
                 <Button
@@ -377,7 +389,6 @@
       </div>
     {/if}
 
-    
     <div class="" in:fly={{ x: -400, duration: 1000 }}>
       <div class="relative">
         {#if $showPrintModel}
@@ -393,14 +404,7 @@
               {#if !$showPrintModel}
                 <th scope="col" class="px-6 py-3"> ID Image </th>
               {/if}
-              {#each [
-                { key: 'firstName', label: 'firstname' },
-                { key: 'middleInitial', label: 'MI' },
-                { key: 'lastName', label: 'lastName' },
-                { key: 'suffixName', label: 'Suffix' },
-                { key: 'completeAddress', label: 'Address' },
-                { key: 'dateOfAppointment', label: 'Appointment' }
-              ] as column}
+              {#each [{ key: "firstName", label: "firstname" }, { key: "middleInitial", label: "MI" }, { key: "lastName", label: "lastName" }, { key: "suffixName", label: "Suffix" }, { key: "completeAddress", label: "Address" }, { key: "dateOfAppointment", label: "Appointment" }] as column}
                 <th
                   scope="col"
                   class="px-6 py-3"
@@ -408,7 +412,8 @@
                     if (headerSortAscending[column.key] == undefined) {
                       headerSortAscending[column.key] = true;
                     } else {
-                      headerSortAscending[column.key] = !headerSortAscending[column.key];
+                      headerSortAscending[column.key] =
+                        !headerSortAscending[column.key];
                     }
                     resetSort(column.key, headerSortAscending[column.key]);
                     sortTable(column.key, headerSortAscending[column.key]);
@@ -434,13 +439,14 @@
                 scope="col"
                 class="px-6 py-3"
                 on:click={() => {
-                  if (headerSortAscending['birthdate'] == undefined) {
-                    headerSortAscending['birthdate'] = true;
+                  if (headerSortAscending["birthdate"] == undefined) {
+                    headerSortAscending["birthdate"] = true;
                   } else {
-                    headerSortAscending['birthdate'] = !headerSortAscending['birthdate'];
+                    headerSortAscending["birthdate"] =
+                      !headerSortAscending["birthdate"];
                   }
-                  resetSort('birthdate', headerSortAscending['birthdate']);
-                  sortTable('birthdate', headerSortAscending['birthdate']);
+                  resetSort("birthdate", headerSortAscending["birthdate"]);
+                  sortTable("birthdate", headerSortAscending["birthdate"]);
                 }}
               >
                 <div class="flex justify-center gap-2 items-center">
@@ -448,9 +454,9 @@
                   <span
                     class={`sort-indicator 
                       ${
-                        headerSortAscending['birthdate'] == undefined
+                        headerSortAscending["birthdate"] == undefined
                           ? ""
-                          : headerSortAscending['birthdate']
+                          : headerSortAscending["birthdate"]
                             ? "asc"
                             : "desc"
                       }
@@ -462,13 +468,14 @@
                 scope="col"
                 class="px-6 py-3"
                 on:click={() => {
-                  if (headerSortAscending['gender'] == undefined) {
-                    headerSortAscending['gender'] = true;
+                  if (headerSortAscending["gender"] == undefined) {
+                    headerSortAscending["gender"] = true;
                   } else {
-                    headerSortAscending['gender'] = !headerSortAscending['gender'];
+                    headerSortAscending["gender"] =
+                      !headerSortAscending["gender"];
                   }
-                  resetSort('gender', headerSortAscending['gender']);
-                  sortTable('gender', headerSortAscending['gender']);
+                  resetSort("gender", headerSortAscending["gender"]);
+                  sortTable("gender", headerSortAscending["gender"]);
                 }}
               >
                 <div class="flex justify-center gap-2 items-center">
@@ -476,9 +483,9 @@
                   <span
                     class={`sort-indicator 
                       ${
-                        headerSortAscending['gender'] == undefined
+                        headerSortAscending["gender"] == undefined
                           ? ""
-                          : headerSortAscending['gender']
+                          : headerSortAscending["gender"]
                             ? "asc"
                             : "desc"
                       }
@@ -490,13 +497,14 @@
                 scope="col"
                 class="px-6 py-3"
                 on:click={() => {
-                  if (headerSortAscending['height'] == undefined) {
-                    headerSortAscending['height'] = true;
+                  if (headerSortAscending["height"] == undefined) {
+                    headerSortAscending["height"] = true;
                   } else {
-                    headerSortAscending['height'] = !headerSortAscending['height'];
+                    headerSortAscending["height"] =
+                      !headerSortAscending["height"];
                   }
-                  resetSort('height', headerSortAscending['height']);
-                  sortTable('height', headerSortAscending['height']);
+                  resetSort("height", headerSortAscending["height"]);
+                  sortTable("height", headerSortAscending["height"]);
                 }}
               >
                 <div class="flex justify-center gap-2 items-center">
@@ -504,9 +512,9 @@
                   <span
                     class={`sort-indicator 
                       ${
-                        headerSortAscending['height'] == undefined
+                        headerSortAscending["height"] == undefined
                           ? ""
-                          : headerSortAscending['height']
+                          : headerSortAscending["height"]
                             ? "asc"
                             : "desc"
                       }
@@ -518,13 +526,14 @@
                 scope="col"
                 class="px-6 py-3"
                 on:click={() => {
-                  if (headerSortAscending['weight'] == undefined) {
-                    headerSortAscending['weight'] = true;
+                  if (headerSortAscending["weight"] == undefined) {
+                    headerSortAscending["weight"] = true;
                   } else {
-                    headerSortAscending['weight'] = !headerSortAscending['weight'];
+                    headerSortAscending["weight"] =
+                      !headerSortAscending["weight"];
                   }
-                  resetSort('weight', headerSortAscending['weight']);
-                  sortTable('weight', headerSortAscending['weight']);
+                  resetSort("weight", headerSortAscending["weight"]);
+                  sortTable("weight", headerSortAscending["weight"]);
                 }}
               >
                 <div class="flex justify-center gap-2 items-center">
@@ -532,9 +541,9 @@
                   <span
                     class={`sort-indicator 
                       ${
-                        headerSortAscending['weight'] == undefined
+                        headerSortAscending["weight"] == undefined
                           ? ""
-                          : headerSortAscending['weight']
+                          : headerSortAscending["weight"]
                             ? "asc"
                             : "desc"
                       }
@@ -556,11 +565,13 @@
                     scope="row"
                     class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
                   >
-                    <img
-                      src={barangayId.IDpictureUrl}
-                      alt="ID Picture"
-                      class="h-10 w-10 rounded-full"
-                    />
+                    <a href={barangayId.IDpictureUrl}>
+                      <img
+                        src={barangayId.IDpictureUrl}
+                        alt="ID"
+                        class="h-10 w-10 rounded-full"
+                      />
+                    </a>
                   </th>
                 {/if}
                 <td class="px-6 py-4">
@@ -650,7 +661,7 @@
                 <td class="px-6 py-4">
                   {barangayId.weight}
                 </td>
-                
+
                 {#if $showPrintModel}
                   <td class="px-6 py-4">
                     {barangayId.status}

@@ -601,6 +601,20 @@
                 <td class="px-6 py-4">
                   {voter.suffixName}
                 </td>
+                {#if !$showPrintModel}
+                  <th
+                    scope="row"
+                    class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
+                  >
+                    <a href={voter.certification}>
+                      <img
+                        src={voter.certification}
+                        alt="HOA Cert/ID"
+                        class="h-10 w-10 rounded-full"
+                      />
+                    </a>
+                  </th>
+                {/if}
                 <td class="px-6 py-4">{voter.precintNumber} </td>
                 <td class="px-6 py-4">{voter.lengthOfStay} </td>
                 <td class="px-6 py-4"> {voter.completeAddress} </td>
