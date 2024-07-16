@@ -25,10 +25,12 @@
       loginStore.password.value
     )
       .then((userCred) => {
+        alert("Login successful!")
         localStorage.setItem("uid", userCred.user.uid);
         loginStore.showLoading = false;
       })
       .catch((error) => {
+        alert(error.code)
         loginStore.showLoading = false;
         loginStore.showErrorDOMmsg = error.code;
       });
