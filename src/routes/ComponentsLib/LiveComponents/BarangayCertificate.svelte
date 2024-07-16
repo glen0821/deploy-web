@@ -791,16 +791,16 @@
               <td class="px-6 py-4"> {cert.lengthOfStay} </td>
               <td class="px-6 py-4"> {cert.purpose} </td>
               <td class="px-6 py-4">
-                <a href={headerSortAscending.validIDUrl}>
+                <a href={cert.validIDUrl}>
                   <img
-                    src={headerSortAscending.validIDUrl}
+                    src={cert.validIDUrl}
                     alt="Valid ID"
                     class="h-10 w-10"
                   />
                 </a>
               </td>
               <td class="px-6 py-4">
-                {#if cert.dateOfAppointment == undefined}
+                <!-- {#if cert.dateOfAppointment == undefined}
                   <button
                     class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
                     on:click={() => {
@@ -809,16 +809,16 @@
                   >
                     Set Date
                   </button>
-                {:else}
+                {:else} -->
                   <span
                     class="cursor-pointer"
                     on:click={() => {
                       setDateHandler(cert, i);
                     }}
                   >
-                    {cert.dateOfAppointment}
+                    {cert.dateOfAppointment ?? "Not set"}
                   </span>
-                {/if}
+                <!-- {/if} -->
                 {#if $setDateIndex === i}
                   <div class="">
                     <div
