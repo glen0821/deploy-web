@@ -85,7 +85,11 @@
               </button>
               <button
                         class="hover:bg-red-500 rounded-full px-4 py-2 hover:scale-105 duration-700 text-red-900 hover:text-white"
-                        on:click={removeData(ordinance.id)}
+                        on:click={() => {
+                          if (confirm('Are you sure you want to delete this ordinance?')) {
+                            removeData(ordinance.id);
+                          }
+                        }}
                         ><i class="ri-delete-bin-line"></i></button
                       >
             </td>

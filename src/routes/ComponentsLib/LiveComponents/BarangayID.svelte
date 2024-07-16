@@ -694,7 +694,11 @@
                       >
                       <button
                         class="hover:bg-red-300 hover:scale-105 px-4 py-2 rounded-full duration-700 hover:text-white"
-                        on:click={removeData(barangayId.id)}
+                        on:click={() => {
+                          if (confirm('Are you sure you want to delete this item?')) {
+                            removeData(barangayId.id);
+                          }
+                        }}
                         ><i class="ri-delete-bin-line"></i></button
                       >
                       <button

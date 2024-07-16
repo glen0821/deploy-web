@@ -484,6 +484,14 @@
                   ></span>
                 </div>
               </th>
+              {#if !$showPrintModel}
+                  <th
+                  scope="col"
+                  class="px-6 py-3"
+                  >
+                   HOA
+                  </th>
+                {/if}
               <th
                 scope="col"
                 class="px-6 py-3"
@@ -607,11 +615,15 @@
                     class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
                   >
                     <a href={voter.certification}>
-                      <img
-                        src={voter.certification}
-                        alt="HOA Cert/ID"
-                        class="h-10 w-10 rounded-full"
-                      />
+                      {#if voter.certification}
+                        <img
+                          src={voter.certification}
+                          alt="HOA Cert/ID"
+                          class="h-10 w-10 rounded-full"
+                        />
+                      {:else}
+                        <span>No HOA</span>
+                      {/if}
                     </a>
                   </th>
                 {/if}
@@ -642,7 +654,9 @@
                       <button
                         class="hover:bg-red-300 duration-700 px-4 p-2 rounded-full hover:text-black hover:font-bold hover:scale-105"
                         on:click={() => {
-                          removeData(voter.id);
+                          if (confirm('Are you sure you want to remove this voter?')) {
+                            removeData(voter.id);
+                          }
                         }}><i class="ri-delete-bin-line text-lg" /></button
                       >
                     </div>

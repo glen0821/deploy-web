@@ -519,7 +519,11 @@
 
                         <button
                           class="hover:bg-red-800 px-4 py-2 rounded-full duration-700 hover:scale-105 hover:text-white"
-                          on:click={removeData(complaintData.id)}
+                          on:click={() => {
+                            if (confirm('Are you sure you want to delete this item?')) {
+                              removeData(complaintData.id);
+                            }
+                          }}
                           ><i class="ri-delete-bin-line"></i></button
                         >
                       </div>
@@ -687,7 +691,11 @@
 
                         <button
                           class="hover:bg-red-800 px-4 py-2 rounded-full duration-700 hover:scale-105 hover:text-white"
-                          on:click={removeData(complaintData.id)}
+                          on:click={() => {
+                            if (confirm('Are you sure you want to delete this item?')) {
+                              removeData(complaintData.id);
+                            }
+                          }}
                           ><i class="ri-delete-bin-line"></i></button
                         >
                       </div>

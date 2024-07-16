@@ -905,7 +905,11 @@
 
                     <button
                       class="font-bold rounded-lg hover:scale-105 duration-700 text-red-800 hover:text-white w-full p-2 hover:bg-red-600 border-b-2 border-white"
-                      on:click={removeData(cert.id)}
+                      on:click={() => {
+                        if (confirm('Are you sure you want to delete this item?')) {
+                          removeData(cert.id);
+                        }
+                      }}
                       ><i class="ri-delete-bin-line" /></button
                     >
 
