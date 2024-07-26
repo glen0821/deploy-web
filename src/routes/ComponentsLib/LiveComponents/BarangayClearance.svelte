@@ -16,7 +16,7 @@
 
   //database calls and hooks
   import { db } from "../../db/firebase";
-  import {  
+  import {
     onSnapshot,
     addDoc,
     collection,
@@ -33,7 +33,7 @@
   import { writable } from "svelte/store";
   export const setDateIndex = writable(-1);
   import flatpickr from "flatpickr";
-  import 'flatpickr/dist/flatpickr.css'
+  import "flatpickr/dist/flatpickr.css";
 
   //handler to show add modal
   const toShowAddModal = () => {
@@ -121,9 +121,10 @@
 
     const notifDocRef = doc(collection(db, "notifications"));
     const messages = {
-      "Processing": "Your clearance is being processed",
-      "Ready for pickup": "Your clearance is ready for pickup, get it before or on appointed date",
-      "Claimed": "Your clearance has been claimed"
+      Processing: "Your clearance is being processed",
+      "Ready for pickup":
+        "Your clearance is ready for pickup, get it before or on appointed date",
+      Claimed: "Your clearance has been claimed",
     };
     const message = messages[selectedStatus] || "Status updated";
 
@@ -181,11 +182,12 @@
       bgyVarStore.address.BINDTHIS = data.address;
       bgyVarStore.lengthOfStay.BINDTHIS = data.lengthOfStay;
       bgyVarStore.purpose.BINDTHIS = data.purpose;
-      bgyVarStore.dateOfAppointment.BINDTHIS = fixDateFormat(data.dateOfAppointment);
+      bgyVarStore.dateOfAppointment.BINDTHIS = fixDateFormat(
+        data.dateOfAppointment,
+      );
     }, 100);
   };
 
-  
   const handlerSearch = () => {
     if (bgyVarStore.trigger) {
       console.log(bgyVarStore.kwiri);
@@ -199,7 +201,10 @@
 
         const filteredData = fbData.filter((data) => {
           return Object.values(data).some((value) =>
-            value.toString().toLowerCase().includes(bgyVarStore.kwiri.toLowerCase())
+            value
+              .toString()
+              .toLowerCase()
+              .includes(bgyVarStore.kwiri.toLowerCase()),
           );
         });
 
@@ -239,7 +244,7 @@
     const mywindow = window.open(
       "",
       "PRINT",
-      "height=891,width=649, initial-scale=1.0"
+      "height=891,width=649, initial-scale=1.0",
     );
 
     if (!mywindow) {
@@ -269,7 +274,10 @@
   const sortTable = (fieldName, isAscending) => {
     const q = query(colRef, orderBy(fieldName, isAscending ? "asc" : "desc"));
     onSnapshot(q, (snapshots) => {
-      const fbData = snapshots.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+      const fbData = snapshots.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
       onSnapsClearance.set(fbData);
       bgyClearance.trigger = false;
     });
@@ -283,7 +291,6 @@
     headerSortAscending[key] = value;
   };
 
-
   const updateGender = async (userID, selectedStatus) => {
     const docRef = doc(colRef, userID);
     const updatedData = {
@@ -293,17 +300,13 @@
     await setDoc(docRef, updatedData, { merge: true });
   };
 
-  
-  
   const disableWeekends = (event) => {
     const element = event.target;
     if (element.getAttribute("picker_set") === "yes") {
       return;
     }
     flatpickr(element, {
-      disable: [
-        (date) => date.getDay() === 0 || date.getDay() === 6,
-      ],
+      disable: [(date) => date.getDay() === 0 || date.getDay() === 6],
     });
     element.setAttribute("picker_set", "yes");
   };
@@ -347,10 +350,7 @@
             >
               <div class="flex gap-2">
                 {#if !$printing}
-                  <Button
-                    TITLE="Print Now"
-                    on:click={() => handlePrint()}
-                  />
+                  <Button TITLE="Print Now" on:click={() => handlePrint()} />
                   <Button
                     TITLE="Close"
                     on:click={() => showPrintModel.set(false)}
@@ -385,22 +385,15 @@
         <table class="w-full text-sm text-left text-gray-500">
           <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
-              {#each [
-                { key: 'firstName', label: 'First Name' },
-                { key: 'middleInitial', label: 'MI' },
-                { key: 'lastName', label: 'Last Name' },
-                { key: 'suffixName', label: 'Suffix' },
-                { key: 'completeAddress', label: 'Address' },
-                { key: 'age', label: 'Age' },
-                { key: 'lengthOfStay', label: 'Length Of Stay' },
-                { key: 'dateOfAppointment', label: 'Date Of Appointment' },
-                { key: 'civilStatus', label: 'Civil Status' }
-              ] as column}
+              {#each [{ key: "firstName", label: "First Name" }, { key: "middleInitial", label: "MI" }, { key: "lastName", label: "Last Name" }, { key: "suffixName", label: "Suffix" }, { key: "completeAddress", label: "Address" }, { key: "age", label: "Age" }, { key: "lengthOfStay", label: "Length Of Stay" }, { key: "dateOfAppointment", label: "Date Of Appointment" }, { key: "civilStatus", label: "Civil Status" }] as column}
                 <th
                   scope="col"
                   class="px-6 py-3"
                   on:click={() => {
-                    headerSortAscending[column.key] = headerSortAscending[column.key] === undefined ? true : !headerSortAscending[column.key];
+                    headerSortAscending[column.key] =
+                      headerSortAscending[column.key] === undefined
+                        ? true
+                        : !headerSortAscending[column.key];
                     resetSort(column.key, headerSortAscending[column.key]);
                     sortTable(column.key, headerSortAscending[column.key]);
                   }}
@@ -424,6 +417,7 @@
               <th scope="col" class="px-6 py-3"> Purpose </th>
               <th scope="col" class="px-6 py-3"> Valid ID </th>
               {#if !$showPrintModel}
+                <th scope="col" class="px-6 py-3"> Status </th>
                 <th scope="col" class="px-6 py-3"> Action </th>
               {/if}
             </tr>
@@ -431,30 +425,23 @@
           <tbody>
             {#each $onSnapsClearance as barangayClearance, i}
               <tr class="bg-white border-b">
-                {#each [
-                  { key: 'firstName', value: barangayClearance.firstName },
-                  { key: 'middleInitial', value: barangayClearance.middleInitial },
-                  { key: 'lastName', value: barangayClearance.lastName },
-                  { key: 'suffixName', value: barangayClearance.suffixName },
-                  { key: 'address', value: barangayClearance.address },
-                  { key: 'age', value: barangayClearance.age },
-                  { key: 'lengthOfStay', value: barangayClearance.lengthOfStay },
-                  { key: 'dateOfAppointment', value: barangayClearance.dateOfAppointment },
-                  { key: 'civilStatus', value: barangayClearance.civilStatus },
-                  { key: 'purpose', value: barangayClearance.purpose },
-                  { key: 'validIDUrl', value: barangayClearance.validIDUrl, isLink: true }
-                ] as column}
+                {#each [{ key: "firstName", value: barangayClearance.firstName }, { key: "middleInitial", value: barangayClearance.middleInitial }, { key: "lastName", value: barangayClearance.lastName }, { key: "suffixName", value: barangayClearance.suffixName }, { key: "address", value: barangayClearance.address }, { key: "age", value: barangayClearance.age }, { key: "lengthOfStay", value: barangayClearance.lengthOfStay }, { key: "dateOfAppointment", value: barangayClearance.dateOfAppointment }, { key: "civilStatus", value: barangayClearance.civilStatus }, { key: "purpose", value: barangayClearance.purpose }, { key: "validIDUrl", value: barangayClearance.validIDUrl, isLink: true }, { key: "status", value: barangayClearance.status, isStatus: true }] as column}
                   <td class="px-6 py-4">
                     {#if column.isLink}
                       <a href={column.value}>
-                        <img src={column.value} alt="Valid ID" class="h-10 w-10" />
+                        <img
+                          src={column.value}
+                          alt="Valid ID"
+                          class="h-10 w-10"
+                        />
                       </a>
                     {:else if column.isSelect}
-                      {#if column.key === 'gender' && !$showPrintModel}
+                      {#if column.key === "gender" && !$showPrintModel}
                         <select
                           class="bg-white"
                           bind:value={column.value}
-                          on:change={() => updateGender(barangayClearance.id, column.value)}
+                          on:change={() =>
+                            updateGender(barangayClearance.id, column.value)}
                         >
                           <option value="Male">Male</option>
                           <option value="Female">Female</option>
@@ -462,12 +449,27 @@
                       {:else}
                         {column.value}
                       {/if}
+                    {:else if column.isStatus}
+                      <select
+                        class="bg-white"
+                        bind:value={column.value}
+                        on:change={() =>
+                          updateStatus(
+                            barangayClearance.id,
+                            barangayClearance.status,
+                            barangayClearance.appointmentOwner,
+                          )}
+                      >
+                        <option value="Processing">On Process</option>
+                        <option value="Ready for pickup">For Pickup</option>
+                        <option value="Claimed">Completed</option>
+                      </select>
                     {:else}
                       {column.value}
                     {/if}
                   </td>
                 {/each}
-                
+
                 {#if !$showPrintModel}
                   <td>
                     <div class="flex gap-2">
@@ -481,11 +483,14 @@
                       <button
                         class="hover:bg-red-500 rounded-full px-4 py-2 hover:scale-105 duration-700 text-red-900 hover:text-white"
                         on:click={() => {
-                          if (confirm('Are you sure you want to delete this item?')) {
+                          if (
+                            confirm(
+                              "Are you sure you want to delete this item?",
+                            )
+                          ) {
                             removeData(barangayClearance.id);
                           }
-                        }}
-                        ><i class="ri-delete-bin-line"></i></button
+                        }}><i class="ri-delete-bin-line"></i></button
                       >
 
                       <button
